@@ -1,0 +1,29 @@
+[project]
+name = "npl-motionlab"
+version = "0.0.0"
+description = "Markerless biomechanics measurement, validation, and engineering practice lab"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "opencv-python",
+    "pandas",
+    "plotly",
+    "pydantic",
+    "pyyaml",
+    "scipy",
+    "statsmodels",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ipykernel",
+    "jupyter",
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers --strict-config"
