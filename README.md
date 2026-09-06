@@ -4,7 +4,15 @@ Markerless biomechanics measurement, validation, and engineering practice lab.
 
 MotionLab is organized around a measurement system for estimating a narrowly
 defined 2D projected sagittal-plane knee flexion angle from standardized
-single-camera video. The project is currently in **M0: Environment & Repository**.
+single-camera video. **M0: Environment & Repository** and **M1: Charter, Scope
+& Requirements** are complete. **M2: Literature & Measurement Framework** has
+not started.
+
+## Project definition
+
+- [Project charter](docs/project_charter.md)
+- [Engineering requirements](docs/requirements.md)
+- [Controlled terminology](docs/terminology.md)
 
 ## Environment
 
@@ -31,5 +39,5 @@ Verify the environment with:
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-No biomechanics, pose-estimation, experimental, or statistical claims have
-been implemented or validated at this milestone.
+No biomechanics, pose-estimation, experimental, or statistical performance
+claims have been implemented or validated at this stage.
