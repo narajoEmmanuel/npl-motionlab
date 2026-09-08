@@ -6,7 +6,8 @@ MotionLab is organized around a measurement system for estimating a narrowly
 defined 2D projected sagittal-plane knee flexion angle from standardized
 single-camera video. **M0: Environment & Repository**, **M1: Charter, Scope &
 Requirements**, **M2: Literature & Measurement Framework**, and **M3:
-Mathematical Verification** are complete.
+Mathematical Verification** are complete. **M4: Camera & Image Verification**
+is in progress.
 
 ## Project definition
 
@@ -15,6 +16,7 @@ Mathematical Verification** are complete.
 - [Controlled terminology](docs/terminology.md)
 - [Targeted literature review](docs/literature_review.md)
 - [Measurement framework](docs/metrology/measurement_framework.md)
+- [M4 camera and image verification](docs/metrology/camera_image_verification.md)
 - [Literature matrix](references/literature_matrix.csv)
 - [Bibliography](references/references.bib)
 
