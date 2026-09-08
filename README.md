@@ -17,6 +17,7 @@ is in progress.
 - [Targeted literature review](docs/literature_review.md)
 - [Measurement framework](docs/metrology/measurement_framework.md)
 - [M4 camera and image verification](docs/metrology/camera_image_verification.md)
+- [M4 execution and handoff guide (Spanish)](docs/metrology/m4_handoff_guide_es.md)
 - [Literature matrix](references/literature_matrix.csv)
 - [Bibliography](references/references.bib)
 
