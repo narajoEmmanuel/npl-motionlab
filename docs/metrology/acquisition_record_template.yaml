@@ -1,0 +1,45 @@
+# MotionLab M4 acquisition record template
+# Copy for each camera condition. Keep unavailable values as null rather than
+# inferring them. The final data layout and identifiers will be frozen in M8.
+
+record_version: motionlab.acquisition-record.m4-draft-v1
+condition_id: null
+recorded_at_local: null
+operator_id: null
+
+device:
+  manufacturer: null
+  model: null
+  operating_system_version: null
+  camera_app: null
+  camera_app_version: null
+
+requested_capture:
+  width_px: null
+  height_px: null
+  nominal_fps: null
+  orientation: null
+  lens: null
+  digital_zoom: null
+  stabilization: null
+  hdr: null
+  focus_mode: null
+  exposure_mode: null
+  white_balance_mode: null
+
+physical_setup:
+  support: null
+  camera_height_mm: null
+  camera_to_target_distance_mm: null
+  yaw_deg: null
+  pitch_deg: null
+  roll_deg: null
+  target_id: null
+  target_orientation: null
+  lighting_description: null
+
+# Populate this section with:
+# python -m motionlab.video_metadata <video> --output <metadata.json>
+observed_file_metadata: null
+
+notes: null

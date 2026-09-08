@@ -28,7 +28,7 @@ recorded physical tests.
 |---|---|---|
 | M4-A | Analytical normalized-to-pixel conversion at multiple aspect ratios | Verified by automated tests |
 | M4-B | Synthetic raster images with known point geometry | Verified by lossless encode/decode tests |
-| M4-C | Device and encoded-video metadata inspection | Planned; requires representative source files |
+| M4-C | Device and encoded-video metadata inspection | Inspector verified; representative device record pending |
 | M4-D | Physical planar-target camera trials | Planned; requires target and device |
 | M4-E | Provisional baseline and empirically justified setup tolerances | Blocked until M4-C and M4-D evidence exists |
 
@@ -72,6 +72,22 @@ the baseline:
 Controls are recorded even when the device does not expose or permit a setting.
 An unknown value is reported as unknown, not inferred from appearance.
 
+Use the draft [acquisition record template](acquisition_record_template.yaml)
+for the manually observed device and setup fields. Inspect the encoded file
+without altering it by running:
+
+```powershell
+.\.venv\Scripts\python.exe -m motionlab.video_metadata <video> --output <metadata.json>
+```
+
+The inspector records the SHA-256 checksum, file size, decoded dimensions,
+reported frame count and nominal FPS, derived duration, codec, decoding
+backend, and backend-reported orientation. Decoded frame dimensions are used
+because they are the coordinate domain seen by downstream geometry. Header FPS
+and frame count do not establish constant frame rate or timestamp integrity.
+Likewise, a backend orientation value of zero can mean either zero rotation or
+missing metadata, so the asymmetric-target check remains mandatory.
+
 ## Physical verification design
 
 Use a rigid planar target with at least three high-contrast point centers whose
@@ -113,5 +129,7 @@ M4 can be marked complete only when:
 | M4-A-001 | `src/motionlab/image_geometry.py` | ML-MOD-002, ML-SW-001 | Implemented |
 | M4-A-002 | `tests/unit/test_image_geometry.py` | ML-MOD-002, ML-REP-002 | Passed |
 | M4-B-001 | `tests/test_synthetic_image_geometry.py` | ML-MOD-002, ML-REP-002 | Passed at M4 start: 49 tests total |
-| M4-C-001 | Representative device/video metadata record | ML-CAM-001 | Pending |
+| M4-C-001 | `src/motionlab/video_metadata.py` | ML-CAM-001, ML-SW-001 | Inspector and CLI passed with generated video: 59 tests total |
+| M4-C-002 | `docs/metrology/acquisition_record_template.yaml` | ML-CAM-001 | Draft template implemented |
+| M4-C-003 | Representative device/video metadata record | ML-CAM-001 | Pending real capture |
 | M4-D-001 | Physical planar-target dataset and report | Camera Layer B | Pending |
