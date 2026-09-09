@@ -1,5 +1,14 @@
 # Guía de ejecución y traspaso de M4
 
+Estado actual: `baseline_001` ya fue capturado y digitalizado cuatro veces.
+Consulta el [registro de evidencia y propuesta M4-D](baseline_001_readiness.md)
+para los resultados, las limitaciones, los registros faltantes y la secuencia
+propuesta de siete capturas. Esa secuencia ya fue ejecutada y su
+[análisis de posición horizontal](m4d01_results.md) respalda provisionalmente
+el encuadre horizontal centrado bajo las condiciones probadas. Las secciones de
+preparación siguientes describen el procedimiento original. M4 sigue
+incompleto; no se inicia M5.
+
 ## Estado al 8 de septiembre de 2026
 
 M4 — Verificación de cámara e imagen — está iniciado, pero no está completo.
@@ -101,9 +110,9 @@ Actualización de preparación (2026-09-09): la lista exacta de entrega de
 `baseline_001`, el blanco nominal 3-4-5 y la cadena de evidencia están en
 [el protocolo M4](camera_image_verification.md#first-representative-acquisition-baseline_001).
 Usa `target_record_path` para enlazar la descripción privada del blanco.
-La localización de centros en video real sigue pendiente; se propone
-digitalización manual después de inspeccionar la captura. No es necesario
-implementar esa herramienta ni definir niveles experimentales antes de grabar.
+Ya existen cuatro digitalizaciones manuales del primer cuadro; su dispersión
+solo caracteriza sensibilidad exploratoria de los clics. La caracterización
+completa de localización y los experimentos físicos siguen pendientes.
 
 ### 1. Conserva el archivo original
 
@@ -168,7 +177,9 @@ Antes de observar errores angulares, crea una copia de la plantilla para cada
 condición y fija por escrito los niveles que sean realizables con tu equipo.
 No definas tolerancias después de ver qué condición produjo mejores resultados.
 
-Ejecuta esta secuencia:
+La siguiente lista es un catálogo de factores posteriores. Para la primera
+secuencia usa únicamente la propuesta acotada del registro de baseline_001,
+una vez confirmadas las condiciones de montaje:
 
 1. varias capturas repetidas de la condición baseline sin mover nada;
 2. cambios de una sola variable por vez: yaw, pitch, roll, altura y distancia;

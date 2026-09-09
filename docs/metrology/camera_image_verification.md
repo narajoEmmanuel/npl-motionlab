@@ -11,6 +11,15 @@ This document is both the M4 execution protocol and its evidence register.
 Numerical camera tolerances will not be claimed until they are supported by
 recorded physical tests.
 
+Current real evidence: [baseline_001 readiness report](baseline_001_readiness.md).
+It records one smartphone acquisition, four manual digitizations of its first
+frame, record gaps, and a conditional seven-capture M4-D proposal. The first-
+capture checklist below remains the acquisition procedure; its pending states
+are updated by the report. M4 is not complete.
+
+The seven-capture proposal was subsequently executed and is reported in
+[M4-D horizontal image-position results](m4d01_results.md).
+
 ## Questions
 
 1. Does conversion from normalized coordinates to decoded-image pixel
@@ -28,9 +37,9 @@ recorded physical tests.
 |---|---|---|
 | M4-A | Analytical normalized-to-pixel conversion at multiple aspect ratios | Verified by automated tests |
 | M4-B | Synthetic raster images with known point geometry | Verified by lossless encode/decode tests |
-| M4-C | Device and encoded-video metadata inspection | Inspector verified; representative device record pending |
-| M4-D | Physical planar-target camera trials | Planned; requires target and device |
-| M4-E | Provisional baseline and empirically justified setup tolerances | Blocked until M4-C and M4-D evidence exists |
+| M4-C | Device and encoded-video metadata inspection | baseline_001 decoded and source/frame checked; acquisition-record gaps remain |
+| M4-D | Physical planar-target camera trials | Center/right sequence analyzed; other camera effects and setup tolerances unresolved |
+| M4-E | Provisional baseline and empirically justified setup tolerances | Horizontal centering provisionally preferred; complete baseline and tolerances pending |
 
 ## Coordinate convention
 
@@ -148,9 +157,9 @@ make this first representative capture.
 
 | Link | Required evidence and current boundary |
 |---|---|
-| Physical target → original video | Target record and acquisition YAML linked to the unchanged source by filename and SHA-256; real acquisition pending |
+| Physical target → original video | baseline_001 source checksum checked; user-reported ruler dimensions available; target companion record missing |
 | Original video → decoded image | Retain a lossless full-frame derivative with source checksum, zero-based sequential frame index, decoded dimensions, OpenCV version/backend, and actual orientation handling; current inspector reads only the first frame and does not export it |
-| Decoded image → target point localization | Identify A/B/C against the physical layout and asymmetric mark; real-video localization is not implemented or characterized |
+| Decoded image → target point localization | baseline_001 has four manual A/B/C coordinate records; exploratory sensitivity only, full localization characterization pending |
 | Localization → pixel coordinates | Retain each raw A/B/C (x, y) in the original decoded-image coordinate system, operator, tool/version, and selection notes; map display zoom back to original pixels |
 | Pixel coordinates → measured planar angle | Use existing `angle_from_points_deg(A, B, C)` with B as vertex; inputs already in pixels need no normalized conversion |
 | Measured angle → nominal comparison | Report signed difference measured ABC minus nominal ABC (90 degrees for this design); it combines construction, projection, optics, and localization effects and does not isolate camera error |
@@ -166,8 +175,8 @@ the rule, index, and reasons for rejected frames; never select by closeness to
 to assess operator sensitivity before treating localization as characterized.
 Any spread is exploratory digitization evidence, not total camera uncertainty.
 
-Implementing a picker is unnecessary before capture. Inspect the real image
-first, then decide whether an existing coordinate-reading tool suffices.
+The baseline_001 report documents the existing user-created manual picker and
+its limitations; no additional localization infrastructure is required here.
 The synthetic exact-intensity centroid helper is test-only; it has not been
 shown to work on compressed smartphone imagery. No automatic segmentation,
 human pose estimation, or M5 work is introduced here.
@@ -186,7 +195,9 @@ original video. For every condition, extract the same predefined target pose or
 frame-selection rule and record both the requested camera settings and decoded
 file properties.
 
-The first controlled sequence should contain:
+The following are candidate follow-up experiments, not a requirement to run
+every factor now. The bounded first sequence is specified in the baseline_001
+report and awaits the missing setup feasibility information:
 
 1. repeated baseline recordings without moving the target or camera;
 2. one-factor changes in yaw, pitch, roll, height, distance, and image-field
@@ -224,5 +235,6 @@ M4 can be marked complete only when:
 | M4-B-001 | `tests/test_synthetic_image_geometry.py` | ML-MOD-002, ML-REP-002 | Passed at M4 start: 49 tests total |
 | M4-C-001 | `src/motionlab/video_metadata.py` | ML-CAM-001, ML-SW-001 | Inspector and CLI passed with generated video: 59 tests total |
 | M4-C-002 | `docs/metrology/acquisition_record_template.yaml` | ML-CAM-001 | Draft template implemented |
-| M4-C-003 | Representative device/video metadata record | ML-CAM-001 | Pending real capture |
-| M4-D-001 | Physical planar-target dataset and report | Camera Layer B | Pending |
+| M4-C-003 | baseline_001 private source/metadata; public readiness report | ML-CAM-001 | Source and first-frame identity checked; requested settings/record structure incomplete |
+| M4-D-001 | baseline_001 private coordinates; public readiness report | Camera Layer B | Four same-frame picks recalculated; exploratory manual sensitivity only |
+| M4-D-002 | Seven-capture private records; public results report | Camera Layer B | Center/right sequence complete; horizontal centering provisionally preferred within tested conditions |
