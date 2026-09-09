@@ -90,6 +90,96 @@ missing metadata, so the asymmetric-target check remains mandatory.
 
 ## Physical verification design
 
+### First representative acquisition: baseline_001
+
+This is a readiness capture, not a completed camera validation. Use three
+high-contrast centers A, B, C on a rigid planar target, with B the vertex.
+The initial design is a nominal 3-4-5 triangle: BA = 300 mm, BC = 400 mm,
+AC = 500 mm, nominal angle ABC = 90 degrees (or a documented common scale).
+Record nominal dimensions separately from actual center-to-center measurements.
+Construction error and physical measurement uncertainty remain unquantified
+unless supported by evidence; nominal 90 degrees is not an error-free reference.
+Include a separate asymmetric mark and an identifiable target outline so that
+rotation, mirroring, and cropping can be checked against the physical layout.
+
+The acquisition YAML already covers the first capture's device and setup.
+Its only added field is `physical_setup.target_record_path`: a private companion
+record is necessary to identify the physical geometry behind the comparison.
+Use existing `notes` for setup measurement methods, room constraints, image-field
+position, and setting controllability; no further structured fields are needed.
+Set `observed_file_metadata` to the relative path of the inspector JSON.
+
+After baseline_001, provide the following locally, under the Git-ignored
+`data/raw/m4/` directory (including private metadata and supporting images):
+
+1. Exact path and original filename of the unedited smartphone video. Preserve
+   the original bytes; describe the transfer method and any known processing.
+2. Completed `baseline_001_acquisition.yaml`, with condition ID `baseline_001`,
+   capture date/time including UTC offset, operator ID, device/app versions,
+   requested resolution/FPS/orientation, lens, zoom, stabilization, HDR, focus,
+   exposure, and white balance. Use null plus an explanation for unknown values.
+3. `baseline_001_metadata.json` from the existing inspector, containing the
+   source checksum and decoded dimensions. Use a new output filename, never the
+   source-video path or an existing evidence file: the current CLI overwrites
+   its output destination. If decoding fails, provide the error and source path.
+4. The linked target record: target ID, material/flatness description, center
+   shapes and sizes, labeled layout/photo of A/B/C and the asymmetric mark,
+   nominal BA/BC/AC and angle ABC, actual measured center-to-center distances,
+   instrument and measurement method, and any construction/measurement limits.
+   A direct physical angle measurement is optional; distinguish it from the
+   nominal value. Do not invent uncertainty values.
+5. Setup observations in YAML notes: support, room and available movement space,
+   camera-to-target relationship, height/distance measurement endpoints and
+   methods, yaw/pitch/roll conventions and how assessed, lighting, target
+   position within the image, and which settings can be locked or controlled.
+   Describe unknown geometry rather than assuming zero angles.
+6. A description of the interval where the target and camera were stationary,
+   with all centers, the asymmetric mark, and outline visible; note blur, glare,
+   occlusion, focus changes, or accidental movement. A rough playback time is a
+   navigation aid, not a verified timestamp.
+
+For the capture, secure the target and phone, aim approximately normal to the
+target plane, keep the complete target visible, and record a stationary interval
+with clearly distinguishable centers. Record the actual setup. No numerical
+factor levels, repetition count, or final acceptance threshold is required to
+make this first representative capture.
+
+### Evidence chain and proposed localization
+
+| Link | Required evidence and current boundary |
+|---|---|
+| Physical target → original video | Target record and acquisition YAML linked to the unchanged source by filename and SHA-256; real acquisition pending |
+| Original video → decoded image | Retain a lossless full-frame derivative with source checksum, zero-based sequential frame index, decoded dimensions, OpenCV version/backend, and actual orientation handling; current inspector reads only the first frame and does not export it |
+| Decoded image → target point localization | Identify A/B/C against the physical layout and asymmetric mark; real-video localization is not implemented or characterized |
+| Localization → pixel coordinates | Retain each raw A/B/C (x, y) in the original decoded-image coordinate system, operator, tool/version, and selection notes; map display zoom back to original pixels |
+| Pixel coordinates → measured planar angle | Use existing `angle_from_points_deg(A, B, C)` with B as vertex; inputs already in pixels need no normalized conversion |
+| Measured angle → nominal comparison | Report signed difference measured ABC minus nominal ABC (90 degrees for this design); it combines construction, projection, optics, and localization effects and does not isolate camera error |
+
+The smallest proposed first method is manual center digitization on a lossless
+decoded still, with zoom for inspection and a saved coordinate/overlay record.
+Define the center as the visually estimated geometric center of each marker's
+boundary; flag ambiguous, clipped, or obscured markers rather than guessing.
+Select the first sequentially decoded frame in the documented stationary
+interval with all required features clear, before calculating its angle. Record
+the rule, index, and reasons for rejected frames; never select by closeness to
+90 degrees. Repeat digitization of the same frame without showing earlier picks
+to assess operator sensitivity before treating localization as characterized.
+Any spread is exploratory digitization evidence, not total camera uncertainty.
+
+Implementing a picker is unnecessary before capture. Inspect the real image
+first, then decide whether an existing coordinate-reading tool suffices.
+The synthetic exact-intensity centroid helper is test-only; it has not been
+shown to work on compressed smartphone imagery. No automatic segmentation,
+human pose estimation, or M5 work is introduced here.
+
+Frame index is not physical time. Reported FPS/count and their duration ratio
+do not establish CFR/VFR, dropped frames, or timestamp integrity. Preserve these
+limitations during the static-angle analysis. Consider another decoder or
+metadata dependency only if the real file exposes an OpenCV limitation that
+prevents a specific M4 decision.
+
+### Later physical experiments
+
 Use a rigid planar target with at least three high-contrast point centers whose
 included angle and relevant distances are independently specified. Preserve the
 original video. For every condition, extract the same predefined target pose or
@@ -99,14 +189,17 @@ file properties.
 The first controlled sequence should contain:
 
 1. repeated baseline recordings without moving the target or camera;
-2. one-factor changes in yaw, pitch, roll, height, and distance;
+2. one-factor changes in yaw, pitch, roll, height, distance, and image-field
+   position (lens distortion may vary between image center and edges);
 3. each available lens, zoom, stabilization, and resolution/frame-rate mode;
 4. orientation and crop checks using an asymmetric target;
 5. a return-to-baseline recording after the perturbations.
 
-Factor levels, repetition count, and allowable tolerances must be entered
-before viewing outcome errors. They depend on the available tripod, target,
-room, and smartphone and therefore are not invented in this initial commit.
+Define factor levels and repetitions only after the actual device, room,
+target, support, baseline geometry, and controllability are known, and before
+viewing the corresponding experimental errors. Image-field position is a
+candidate factor only; no numerical levels are set. Setup tolerances require
+evidence, and final engineering acceptance thresholds are not defined here.
 
 ## Acceptance conditions
 

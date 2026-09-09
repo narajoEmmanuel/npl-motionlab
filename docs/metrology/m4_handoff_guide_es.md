@@ -97,6 +97,14 @@ comportamiento de cámara e imagen con geometría planar conocida.
 
 ## Primera captura representativa — M4-C
 
+Actualización de preparación (2026-09-09): la lista exacta de entrega de
+`baseline_001`, el blanco nominal 3-4-5 y la cadena de evidencia están en
+[el protocolo M4](camera_image_verification.md#first-representative-acquisition-baseline_001).
+Usa `target_record_path` para enlazar la descripción privada del blanco.
+La localización de centros en video real sigue pendiente; se propone
+digitalización manual después de inspeccionar la captura. No es necesario
+implementar esa herramienta ni definir niveles experimentales antes de grabar.
+
 ### 1. Conserva el archivo original
 
 Crea el área privada local:
@@ -150,6 +158,11 @@ Compara el YAML y el JSON:
 Una discrepancia se documenta; no se corrige alterando el archivo fuente.
 
 ## Secuencia física — M4-D
+
+Esta secuencia es posterior a `baseline_001`. Los niveles se definirán cuando
+se conozcan el dispositivo, espacio, blanco, soporte, geometría y controles.
+Incluye la posición del blanco dentro de la imagen como factor candidato por
+la posible variación de distorsión entre el centro y los bordes, sin fijar niveles.
 
 Antes de observar errores angulares, crea una copia de la plantilla para cada
 condición y fija por escrito los niveles que sean realizables con tu equipo.

@@ -35,10 +35,12 @@ physical_setup:
   pitch_deg: null
   roll_deg: null
   target_id: null
+  # Relative path to the private target description; see baseline_001 checklist.
+  target_record_path: null
   target_orientation: null
   lighting_description: null
 
-# Populate this section with:
+# Set this field to the relative path of the JSON produced by:
 # python -m motionlab.video_metadata <video> --output <metadata.json>
 observed_file_metadata: null
 
