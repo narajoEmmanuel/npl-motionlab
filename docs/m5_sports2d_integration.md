@@ -8,7 +8,7 @@ This document records the M5 audit performed on 2026-09-16, the resulting
 minimal integration design, the representative private-video runtime checkpoint,
 and the final pull-request review. All M5 acceptance criteria are satisfied.
 The M5 feature branch was merged to `main` through PR #2 at commit `8619356`.
-M6 has not started; its M5 prerequisite is satisfied.
+This satisfied the prerequisite for the subsequent M6 implementation.
 
 ## Current MotionLab state
 

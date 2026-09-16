@@ -52,16 +52,21 @@ exported 597 frames, MotionLab produced 541 valid geometry rows and preserved 56
 `missing_landmark` rows as invalid with `NaN` projected flexion, and the full
 MotionLab regression suite passed with `64 passed`.
 
+**M6: End-to-End Angle Pipeline** is complete locally. The documented command
+reuses the M5 TRC, verifies source/config provenance, preserves invalid frames,
+and writes a CSV, figure, deterministic recording-maximum summary and provenance
+JSON. The full suite passes with `73 passed`.
+See [M6 reproduction and output contract](docs/m6_angle_pipeline.md).
+
 See the [M5 integration audit](docs/m5_sports2d_integration.md) and the
 [Simplified Core roadmap](docs/roadmap.md).
 
 ## Core completion path
 
-1. implement M6 end-to-end source-to-angle orchestration on one representative video;
-2. freeze the simplest stable squat-event summary rule;
-3. collect and process five controlled one-squat video trials;
-4. report simple descriptive results, failures, configuration, and limitations;
-5. publish a concise technical conclusion and reproducible release.
+1. freeze the selected M6 recording-maximum rule and side for M7;
+2. collect and process five controlled one-squat video trials;
+3. report simple descriptive results, failures, configuration, and limitations;
+4. publish a concise technical conclusion and reproducible release.
 
 No second pose engine, manual reference, full uncertainty budget, Monte Carlo
 study, robustness matrix, or generalized camera calibration is required to
