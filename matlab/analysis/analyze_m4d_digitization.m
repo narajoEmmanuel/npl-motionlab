@@ -26,5 +26,10 @@ function result = analyze_m4d_digitization(dataDir,outputDir)
     conditionSummary=table(condition,nRecordings,meanOfRecordingMeansDeg,meanSignedDifferenceDeg,betweenRecordingSampleSDDeg,rangeOfRecordingMeansDeg,meanWithinFrameSampleSDDeg,achievedMeanBPxX,achievedMeanBPxY,achievedMeanBNormalizedX,achievedMeanBNormalizedY);
     pooledWithinFrameSampleSDDeg=sqrt(sum(allResiduals.^2)/(numel(allResiduals)-7)); rightMinusCenterMeanDeg=mean(rightMeans)-mean(centerMeans); returnMinusInitialCenterMeanDeg=meanAngle(returnMask)-mean(centerMeans);
     result=struct('per_capture',perCapture,'condition_summary',conditionSummary,'right_minus_center_mean_deg',rightMinusCenterMeanDeg,'return_minus_initial_center_mean_deg',returnMinusInitialCenterMeanDeg,'pooled_within_frame_sample_sd_deg',pooledWithinFrameSampleSDDeg,'return_capture',perCapture(returnMask,:));
-    writetable(perCapture,fullfile(outputDir,'m4d_per_capture.csv')); writetable(conditionSummary,fullfile(outputDir,'m4d_condition_summary.csv')); fid=fopen(fullfile(outputDir,'m4d_summary.txt'),'w'); cleaner=onCleanup(@() fclose(fid)); %#ok<NASGU> fprintf(fid,'M4-D MATLAB descriptive analysis\nRight minus Center mean: %.12f deg\nReturn minus initial Center mean: %.12f deg\nPooled within-frame sample SD: %.12f deg\n',rightMinusCenterMeanDeg,returnMinusInitialCenterMeanDeg,pooledWithinFrameSampleSDDeg); plot_m4d_results(result,outputDir);
+    writetable(perCapture,fullfile(outputDir,'m4d_per_capture.csv'));
+    writetable(conditionSummary,fullfile(outputDir,'m4d_condition_summary.csv'));
+    fid=fopen(fullfile(outputDir,'m4d_summary.txt'),'w');
+    cleaner=onCleanup(@() fclose(fid)); %#ok<NASGU>
+    fprintf(fid,'M4-D MATLAB descriptive analysis\nRight minus Center mean: %.12f deg\nReturn minus initial Center mean: %.12f deg\nPooled within-frame sample SD: %.12f deg\n',rightMinusCenterMeanDeg,returnMinusInitialCenterMeanDeg,pooledWithinFrameSampleSDDeg);
+    plot_m4d_results(result,outputDir);
 end
