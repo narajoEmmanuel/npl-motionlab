@@ -7,8 +7,8 @@
 This document records the M5 audit performed on 2026-09-16, the resulting
 minimal integration design, the representative private-video runtime checkpoint,
 and the final pull-request review. All M5 acceptance criteria are satisfied.
-M6 has not started and must begin only after the M5 feature branch is merged to
-`main`.
+The M5 feature branch was merged to `main` through PR #2 at commit `8619356`.
+M6 has not started; its M5 prerequisite is satisfied.
 
 ## Current MotionLab state
 
@@ -293,7 +293,7 @@ M5 does not:
    private video. Complete.
 7. Ingest its pixel TRC and inspect mapping/missingness. Complete.
 8. Complete final documentation and PR review. Complete.
-9. Merge the completed M5 feature branch before starting M6. Pending.
+9. Merge the completed M5 feature branch before starting M6. Complete, PR #2.
 
 ## M5 acceptance status
 
@@ -314,5 +314,5 @@ M5 does not:
 
 M5 is **COMPLETE**. The integration milestone is closed with evidence bounded to
 the tested representative workflow. No inference-performance or biomechanical-
-validity claim is authorized by this milestone. The branch must be merged before
-M6 begins.
+validity claim is authorized by this milestone. PR #2 is merged to `main`, so
+the prerequisite for starting M6 is satisfied.

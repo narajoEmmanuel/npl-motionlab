@@ -57,12 +57,11 @@ See the [M5 integration audit](docs/m5_sports2d_integration.md) and the
 
 ## Core completion path
 
-1. merge the completed M5 integration branch;
-2. implement M6 end-to-end source-to-angle orchestration on one representative video;
-3. freeze the simplest stable squat-event summary rule;
-4. collect and process five controlled one-squat video trials;
-5. report simple descriptive results, failures, configuration, and limitations;
-6. publish a concise technical conclusion and reproducible release.
+1. implement M6 end-to-end source-to-angle orchestration on one representative video;
+2. freeze the simplest stable squat-event summary rule;
+3. collect and process five controlled one-squat video trials;
+4. report simple descriptive results, failures, configuration, and limitations;
+5. publish a concise technical conclusion and reproducible release.
 
 No second pose engine, manual reference, full uncertainty budget, Monte Carlo
 study, robustness matrix, or generalized camera calibration is required to
