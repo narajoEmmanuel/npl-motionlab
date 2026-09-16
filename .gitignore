@@ -28,6 +28,10 @@ Thumbs.db
 
 # Private/raw human data
 data/raw/
+
+# Private/derived human analysis artifacts
+data/derived/
+
 *.mp4
 *.mov
 *.avi

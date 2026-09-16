@@ -58,7 +58,7 @@ video-processing stack.
 | M2 | Literature and measurement framework | Evidence boundaries documented | Complete |
 | M3 | Mathematical verification | Known-angle geometry and edge cases verified | Complete |
 | M4 | Controlled camera and image baseline | Pixel conversion verified, one real acquisition characterized, M4-D supports centered framing under tested conditions | Complete under simplified scope |
-| M5 | Sports2D integration | Pinned engine/configuration produces traceable pixel landmarks that MotionLab can ingest | Next |
+| M5 | Sports2D integration | Pinned engine/configuration produces traceable pixel landmarks that MotionLab can ingest | Complete |
 | M6 | End-to-end angle pipeline | One representative video runs from source metadata to MotionLab angle time series and summary without manual coordinate entry | Planned |
 | M7 | Small controlled squat dataset | Five independent one-squat video trials collected under the fixed baseline and processed reproducibly | Planned |
 | M8 | Final Core analysis | Per-trial outputs and simple descriptive summaries generated with explicit limitations | Planned |
@@ -66,6 +66,24 @@ video-processing stack.
 
 Milestones after M4 are intentionally small. New work must demonstrate that it
 changes the final Core conclusion before it is made mandatory.
+
+## M5 completion evidence
+
+The representative private-video runtime check was completed with the pinned
+Sports2D `0.8.34` / Pose2Sim `0.10.49` environment.
+
+Observed integration evidence:
+
+- 597 frames exported by Sports2D;
+- the real `_px_person00.trc` was consumed by MotionLab;
+- `RHip`, `RKnee`, and `RAnkle` mapping was confirmed on the real boundary;
+- 541 frames produced valid MotionLab geometry;
+- 56 frames remained invalid as `missing_landmark` with `NaN` projected flexion;
+- the full MotionLab test suite passed, `64 passed`.
+
+This is integration evidence, not pose-accuracy or biomechanical-validity
+evidence. M5 is complete. M6 has not started and must begin only after the M5
+feature branch is merged to `main`.
 
 ## M4 closure decision
 
@@ -195,6 +213,7 @@ The following are deferred until a specific future question requires them:
 - manual-reference validation beyond the optional Kinovea appendix;
 - full GUM-style uncertainty budgets;
 - Monte Carlo uncertainty propagation;
+- advanced filtering comparisons;
 - 3D reconstruction, OpenSim, inverse kinematics, or multi-camera systems;
 - clinical, diagnostic, injury-risk, or rehabilitation applications;
 - accreditation and teaching-module expansion.

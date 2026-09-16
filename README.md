@@ -41,23 +41,28 @@ bounded engineering conclusion
 ```
 
 **M0: Environment & Repository**, **M1: Charter & Requirements**, **M2:
-Literature & Measurement Framework**, **M3: Mathematical Verification**, and
-**M4: Controlled Camera & Image Baseline** are complete under the simplified
-Core scope.
+Literature & Measurement Framework**, **M3: Mathematical Verification**, **M4:
+Controlled Camera & Image Baseline**, and **M5: Sports2D Integration** are
+complete under the simplified Core scope.
 
-**M5: Sports2D Integration** is the next milestone.
+M5 closed with a pinned isolated Sports2D environment, a tested pixel-TRC
+adapter, explicit landmark mapping, preserved missingness, MotionLab-owned angle
+calculation, and one representative private-video runtime checkpoint. Sports2D
+exported 597 frames, MotionLab produced 541 valid geometry rows and preserved 56
+`missing_landmark` rows as invalid with `NaN` projected flexion, and the full
+MotionLab regression suite passed with `64 passed`.
 
-The complete current plan is in the [simplified Core roadmap](docs/roadmap.md).
+See the [M5 integration audit](docs/m5_sports2d_integration.md) and the
+[Simplified Core roadmap](docs/roadmap.md).
 
 ## Core completion path
 
-1. integrate one pinned Sports2D/RTMPose workflow;
-2. ingest pixel hip, knee, and ankle landmarks;
-3. compute the authoritative MotionLab angle using the already verified geometry;
-4. demonstrate the complete workflow on one representative video;
-5. collect and process five controlled one-squat video trials;
-6. report simple descriptive results, failures, configuration, and limitations;
-7. publish a concise technical conclusion and reproducible release.
+1. merge the completed M5 integration branch;
+2. implement M6 end-to-end source-to-angle orchestration on one representative video;
+3. freeze the simplest stable squat-event summary rule;
+4. collect and process five controlled one-squat video trials;
+5. report simple descriptive results, failures, configuration, and limitations;
+6. publish a concise technical conclusion and reproducible release.
 
 No second pose engine, manual reference, full uncertainty budget, Monte Carlo
 study, robustness matrix, or generalized camera calibration is required to
@@ -81,6 +86,8 @@ is not required for the Core release.
 ## Project definition
 
 - [Simplified Core roadmap](docs/roadmap.md)
+- [M5 Sports2D integration audit](docs/m5_sports2d_integration.md)
+- [Sports2D integration boundary](integrations/sports2d/README.md)
 - [Project charter](docs/project_charter.md)
 - [Engineering requirements](docs/requirements.md)
 - [Controlled terminology](docs/terminology.md)
@@ -99,10 +106,9 @@ The [MotionLab Engineering Foundations](docs/foundations/README.md) knowledge
 base explains the mathematical, numerical, programming, and software-engineering
 concepts verified through M3. These foundations remain valid and are retained.
 
-## Environment
+## Environments
 
-The current development environment uses Python 3.13 and is defined by
-`pyproject.toml`.
+The MotionLab Core uses Python 3.13 and is defined by `pyproject.toml`.
 
 ```powershell
 py -3.13 -m venv .venv
@@ -111,9 +117,10 @@ py -3.13 -m venv .venv
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-`pyproject.toml` remains the authoritative declaration of direct MotionLab
-dependencies. External pose-engine dependencies may be isolated and pinned when
-M5 is implemented so they do not destabilize the small verified Core package.
+Sports2D is intentionally kept in a separate pinned environment. Installation
+and execution are documented in
+[`integrations/sports2d/README.md`](integrations/sports2d/README.md). It is not
+a direct MotionLab package dependency.
 
 ## Claim boundary
 
