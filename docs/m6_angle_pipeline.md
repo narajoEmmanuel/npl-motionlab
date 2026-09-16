@@ -21,7 +21,7 @@ From the repository root, the demonstrated command is:
   --trc data\derived\sports2d\IMG_5306_Sports2D\IMG_5306_Sports2D_px_person00.trc `
   --engine-provenance data\derived\sports2d\IMG_5306_Sports2D\motionlab_sports2d_provenance.json `
   --side right `
-  --output-dir data\derived\m6\IMG_5306_right_release
+  --output-dir data\derived\m6\IMG_5306_right_clean_4cc8cfa
 ```
 
 These are private local inputs, unavailable in a public checkout. Substitute
@@ -123,9 +123,15 @@ on acquisition, not automatic repetition detection.
 The documented command completed successfully and generated all four artifacts:
 597 rows, engine frames 0 through 596, 541 valid geometries, 56 missing-landmark
 rows with NaN flexion, and recording maximum 118.19774379200672 degrees at frame
-260. The source hash matched M5. The saved figure was visually inspected.
-Provenance records the exact module hashes and dirty local implementation state
-used for the checkpoint.
+260. The source hash matched M5. The earlier implementation checkpoint's saved
+figure was visually inspected; the final evidence run reused that committed
+implementation without changes or renewed Sports2D inference.
+The final checkpoint ran on `feature/m6-end-to-end-pipeline` with a clean working
+tree at revision `4cc8cfa32982920f9d3fcb121c6733e041f9c53f`. Its provenance records
+that revision and `working_tree_dirty: false`. All four module hashes and the
+source, TRC and engine-JSON hashes were verified against the local files, along
+with the pinned Sports2D contract and the expected counts/event result.
+The full test suite was run once after this final clean checkpoint: **73 passed**.
 
 ```powershell
 & .\.venv\Scripts\python.exe -m pytest tests\test_angle_pipeline.py -q
