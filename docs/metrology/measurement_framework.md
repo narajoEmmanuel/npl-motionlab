@@ -2,178 +2,212 @@
 
 ## Purpose
 
-This document defines the conceptual measurement model for M2. It establishes
-what enters the system, what is reported, which quantities can influence the
-result, and which claims each validation layer may support. M3 will provide the
-formal geometric derivation and verified numerical implementation.
+This document defines the simplified MotionLab measurement framework adopted on
+2026-09-16. It preserves the verified mathematical and traceability concepts
+from the earlier framework while removing optional reference, uncertainty, and
+robustness work from the Core completion path.
 
-## Measurement result
+## Reported quantity
 
-The reported quantity is a 2D projected sagittal-plane knee flexion angle in
-degrees, accompanied eventually by relevant quality information and an
-uncertainty statement appropriate to the intended use.
+The Core reported quantity is a **2D projected sagittal-plane knee flexion
+angle** in degrees.
 
-For image-plane hip, knee, and ankle coordinates, the conceptual model is:
+For projected hip, knee, and ankle coordinates in the image plane, the Core
+computational relationship is:
 
 ```math
-\theta_{flex} = f(x_H, y_H, x_K, y_K, x_A, y_A; I, C, P, M, R)
+\theta_{flex} = g(H, K, A; I)
 ```
 
 where:
 
-- `H`, `K`, and `A` are projected proximal, knee, and distal landmark roles;
-- `I` represents image dimensions and coordinate conversion;
-- `C` represents camera and projection conditions;
-- `P` represents processing and frame-selection decisions;
-- `M` represents pose-model identity, version, and landmark semantics;
-- `R` represents the reference procedure when a comparison is reported.
+- `H` is the projected hip landmark role;
+- `K` is the projected knee landmark role;
+- `A` is the projected ankle landmark role;
+- `I` represents the coordinate domain and image dimensions required for any
+  normalized-to-pixel conversion.
 
-The six point coordinates are direct computational inputs, but they are not the
-complete measurement model. The additional quantities determine how those
-coordinates arose and how the result can be interpreted.
+The external pose engine determines how landmark coordinates are obtained.
+MotionLab remains responsible for mapping those coordinates into its landmark
+roles and computing the project-defined angle.
+
+## Angle convention
+
+The verified generic geometry forms the unsigned included angle between the
+knee-to-hip and knee-to-ankle vectors. The project flexion convention is the
+supplement of that included angle:
+
+```math
+\theta_{flex} = 180^\circ - \alpha_{included}
+```
+
+This produces 0° for projected full extension and increasing positive values for
+projected flexion.
+
+The value remains an image-plane quantity and must not be presented as a full
+anatomical 3D knee joint angle.
 
 ## Coordinate domains
 
-MotionLab shall distinguish:
+MotionLab distinguishes:
 
-1. normalized model coordinates;
-2. pixel coordinates tied to image width and height;
-3. optional corrected image coordinates if lens correction is later justified;
-4. derived segment vectors and angles;
-5. reference-marker coordinates acquired independently from the same frame.
+1. source-video image dimensions;
+2. external pose-engine coordinates;
+3. pixel coordinates used for authoritative MotionLab geometry;
+4. derived included angle;
+5. derived projected flexion angle.
 
-Normalized `x` and `y` values cannot be treated as isotropically scaled unless
-that property is demonstrated. The default computational route converts them
-to pixel coordinates before Euclidean geometry. M3–M4 will verify this with
-analytical and image-based cases.
+If the external engine supplies normalized coordinates, image width and height
+must be applied before Euclidean angle geometry unless equivalence is explicitly
+demonstrated for that coordinate convention. Pixel-coordinate outputs are
+preferred for the simplified Sports2D integration.
 
-## Working angle convention
-
-The geometric included angle is formed by vectors from the projected knee point
-to the projected hip and ankle points. The reported flexion angle is the
-supplement of that included angle, giving 0° in projected full extension and
-increasing positive flexion.
-
-This convention is documented but not yet V1/V2 verified. M3 must derive it,
-define its range, set numerical tolerances, and handle degenerate segments.
-
-## Measurement chain
+## Core measurement chain
 
 ```text
-controlled movement and camera configuration
-→ encoded source video and metadata
-→ decoded frame and image dimensions
-→ raw markerless landmarks
-→ coordinate-domain conversion
-→ raw projected angle and quality flags
-→ predefined optional processing
-→ traceable reported markerless result
+controlled squat and fixed camera setup
+→ original encoded video
+→ source hash and metadata record
+→ Sports2D / RTMPose
+→ pixel hip / knee / ankle landmarks
+→ explicit MotionLab landmark mapping
+→ MotionLab included-angle geometry
+→ projected knee-flexion angle
+→ compact result + technical figure
 ```
 
-The independent comparison chain is:
+The Core repeated-trial layer then adds:
 
 ```text
-same source video and frame
-→ visible reference-marker digitization
-→ reference coordinates
-→ identical verified angle convention
-→ characterized reference result
-→ paired difference: markerless − reference
+five independent one-squat videos
+→ same frozen processing configuration
+→ one predefined event result per trial
+→ descriptive summary across trials
+→ bounded engineering conclusion
 ```
 
-Using the same video controls timing and camera realization, but does not remove
-landmark-semantic mismatch, digitization error, placement error, or shared
-projection limitations.
+## What the Core is designed to demonstrate
 
-## Influence quantities and current evidence state
+The Core can support claims that:
 
-| Category | Examples | Current state | Planned treatment |
-|---|---|---|---|
-| Landmark localization | coordinate noise, occlusion, model confidence | Unquantified | M6 pilot characterization |
-| Landmark semantics | model joint definition versus visible marker center | Unquantified | M5–M7 mapping and sensitivity |
-| Image geometry | width, height, aspect ratio, crop, rotation | Defined, unverified | M3–M4 analytical/image tests |
-| Camera pose | yaw, pitch, roll, height, distance | Literature-supported influence | M4 control; M15 selected robustness |
-| Optics | lens, distortion, digital zoom, stabilization | Uncharacterized | M4 device inspection and tests |
-| Timing | frame rate, variable frame rate, timestamps, frame selection | Uncharacterized | M4 and M8 metadata handling |
-| Processing | missing data, interpolation, smoothing, event selection | Not selected | Predefine after pilot; preserve raw |
-| Reference | placement, center identification, rater, resolution | Candidate only | M7 repeatability and uncertainty |
-| Trial hierarchy | subject, session, trial, frame | Conceptually defined | M9 pilot; M10 SAP freeze |
+- the MotionLab angle implementation is analytically verified and unit-tested;
+- the image-coordinate conversion behaves as documented in the tested cases;
+- a fixed source-to-landmark-to-angle workflow can be reproduced with recorded
+  software/model versions and configuration;
+- five independent controlled trials were processed under one bounded setup;
+- observed within-protocol variation and pipeline failures were described.
 
-No numerical probability distribution is assigned at M2.
+The Core cannot establish:
 
-## Validation claim boundaries
+- clinical validity;
+- anatomical 3D accuracy;
+- equivalence to Vicon or other professional systems;
+- population-level performance;
+- general camera robustness;
+- trueness against an error-free reference;
+- a complete measurement-uncertainty budget.
 
-| Layer | Evidence produced | Claims allowed | Claims not allowed |
-|---|---|---|---|
-| A — analytical/software | known geometry and unit-test results | Formula and implementation correctness | Camera, pose, or human validity |
-| B — physical/camera | known planar geometry under image acquisition | Camera/image behavior for tested conditions | Human landmark validity |
-| C — reference | repeatability and limitations of manual reference | Reference fitness for stated comparison | Error-free ground truth |
-| D — baseline | paired controlled human trials | Agreement and repeatability for tested baseline | Robustness or general clinical validity |
-| E — robustness | controlled factor variations | Sensitivity within tested levels | Performance outside tested ranges |
+## Influence quantities
 
-## Candidate comparison quantities
+Influence quantities still matter, but most are controlled rather than fully
+characterized in the simplified Core.
 
-For paired markerless estimate `m_i` and reference result `r_i`, define the
-signed difference conceptually as:
+| Category | Core treatment |
+|---|---|
+| Image dimensions / coordinate conversion | Verified and explicitly handled |
+| Camera device / mode | Held fixed and recorded |
+| Horizontal framing | Centered based on bounded M4-D evidence |
+| Camera pose / distance / height | Kept practically consistent, not systematically characterized |
+| Lighting | Kept practically consistent and documented |
+| Pose model identity/version | Pinned and recorded |
+| Landmark semantics | Explicitly mapped and documented |
+| Missing landmarks | Preserved/flagged, never silently fabricated |
+| Interpolation/filtering/outlier processing | Disabled initially unless a concrete Core problem justifies use |
+| Trial independence | One video trial is the independent repeated unit |
+| Frame-level observations | Used within a trial, not counted as independent replicates |
 
-```math
-d_i = m_i - r_i
+## Event-summary rule
+
+The representative-video step in M6 will be used to choose the simplest stable
+predefined squat-event rule for the five Core trials. Once selected, the rule is
+frozen before the five-trial dataset is processed.
+
+The event rule must be algorithmic or otherwise explicitly documented. It must
+not select a frame because its resulting angle looks favorable.
+
+## Core analysis
+
+The Core analysis is descriptive.
+
+At minimum it reports:
+
+- one predefined event result per independent trial;
+- mean;
+- standard deviation;
+- minimum;
+- maximum;
+- range;
+- missing-landmark or pipeline-failure count;
+- one representative full angle time series.
+
+Inferential statistics, ICC, ANOVA, Bland-Altman analysis, confidence intervals,
+and formal uncertainty propagation are not mandatory for the Core.
+
+## Traceability
+
+Each Core result should be linkable to:
+
+- source-video identifier;
+- source checksum;
+- decoded image dimensions;
+- acquisition configuration record;
+- Sports2D version;
+- pose model/configuration identity;
+- landmark-output artifact;
+- MotionLab code revision;
+- event-summary rule;
+- derived result and figure.
+
+Identifiable raw human video remains private by default.
+
+## Optional Kinovea comparison
+
+After Core completion, a small subset of Core trials may be manually measured in
+Kinovea. If performed, the comparison chain is:
+
+```text
+same selected Core video/frame
+→ documented Kinovea manual procedure
+→ manual projected angle
+→ paired difference from MotionLab result
 ```
 
-Candidate summaries include signed error, absolute error, bias, MAE, RMSE,
-standard deviation of differences, failure rate, and limits of agreement.
-Selection, estimands, confidence intervals, clustering, and interpretation are
-deferred to the M10 statistical analysis plan. Correlation and R² may describe
-association but cannot establish agreement.
+This optional comparison may describe agreement with the manual procedure. It
+does not make Kinovea ground truth and is not necessary to finish MotionLab.
 
-## Traceability model
+## Optional Advanced MATLAB Verification Appendix
 
-Every future reported value should be traceable to:
+MATLAB may independently reproduce angle geometry, analytical cases,
+deterministic perturbation studies, selected experimental analysis, and
+Python-to-MATLAB consistency checks. This appendix supports software/modeling
+verification only and does not extend Core biomechanical claims.
 
-- subject or synthetic-object identifier;
-- session and independent trial;
-- source-video identifier and file checksum;
-- frame number and timestamp where available;
-- acquisition configuration and device metadata;
-- pose engine, model, and software versions;
-- raw landmark record and quality state;
-- reference record and operator where applicable;
-- processing configuration and code revision;
-- derived result, figure, or table identifier.
+## Deferred advanced questions
 
-The specific schemas and file layout belong to M8.
+The following require a later scope decision:
 
-## Uncertainty strategy
+- intrinsic/lens calibration;
+- systematic camera perturbation studies;
+- multiple pose engines;
+- multiple participants;
+- manual-reference validation as a main endpoint;
+- full uncertainty budgets;
+- Monte Carlo propagation;
+- robustness matrices;
+- 3D reconstruction or musculoskeletal modeling.
 
-M13 will construct an uncertainty budget consistent with JCGM guidance. Each
-contribution must be classified as experimentally quantified, literature
-informed, instrument specified, estimated, modeled, exploratory, or
-unquantified. Correlation among inputs and systematic effects must be considered.
+## Scope principle
 
-M14 may use Monte Carlo propagation for nonlinear geometry or non-Gaussian
-inputs. Until empirical inputs exist, pixel-error simulations are labeled
-exploratory sensitivity analyses and cannot support a V5 claim.
-
-## Deferred decisions
-
-- pose-estimation technology and model configuration: M5;
-- final landmark-to-reference semantic mapping: M5–M7;
-- exact camera baseline and allowable setup tolerances: M4, then M10;
-- missing-landmark and smoothing policy: M6 and pilot, frozen at M10;
-- event or frame-selection rule: pilot and M10;
-- statistical estimands and primary metrics: M10;
-- numerical acceptance criterion: M10 with documented provenance;
-- robustness factors and levels: after baseline evidence, M15.
-
-## Failure modes to carry forward
-
-- zero-length or coincident landmark segments;
-- incorrect normalized-to-pixel conversion;
-- rotation or aspect-ratio metadata ignored;
-- out-of-plane movement and perspective bias;
-- left/right identity swaps or occlusion;
-- reference marker/model landmark semantic mismatch;
-- rater-dependent marker center selection;
-- frames treated as independent replicates;
-- filtering selected after inspecting favorable results;
-- reference differences mislabeled as error against truth.
+The simplified framework favors a small traceable result over a broad unfinished
+validation program. New complexity must demonstrate direct value to the Core
+conclusion before it becomes mandatory.

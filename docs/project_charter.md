@@ -5,171 +5,179 @@
 | Field | Value |
 |---|---|
 | Project | NPL MotionLab |
-| Milestone | M1 — Charter, Scope & Requirements |
-| Status | Baseline definition |
+| Status | Simplified Core baseline |
 | Owner | Emmanuel Naranjo Blanco |
-| Last updated | 2026-09-06 |
+| Last updated | 2026-09-16 |
 
 ## Objective
 
-Build and validate a reproducible engineering measurement system that estimates
-a two-dimensional projected sagittal-plane knee flexion angle from standardized
-single-camera smartphone video during a controlled bodyweight squat.
+Build and characterize a reproducible engineering workflow that estimates a
+**2D projected sagittal-plane knee flexion angle** from controlled single-camera
+smartphone video during a bodyweight squat.
 
-The project will determine whether the resulting markerless measurement has
-sufficient agreement, repeatability, and robustness for a narrowly defined
-engineering education and movement-analysis laboratory use case. Suitability
-will be decided against criteria whose provenance is documented and whose
-values are frozen before confirmatory analysis.
+The project reuses one mature external pose-estimation workflow for landmark
+localization and retains MotionLab-specific responsibilities for provenance,
+landmark adaptation, verified geometry, controlled acquisition, repeatable
+processing, and bounded interpretation.
 
 ## Engineering question
 
-Under a controlled baseline camera and movement protocol, how closely and how
-repeatably does a markerless estimate of projected knee flexion agree with a
-characterized, same-video, manually digitized 2D reference measurement?
+Can a small, explicitly versioned single-camera workflow reproducibly transform
+controlled squat video into traceable 2D projected knee-flexion results using
+external pose landmarks and independently verified MotionLab geometry?
+
+The Core project is not designed to prove clinical validity, population-level
+accuracy, or equivalence to professional motion-capture systems.
 
 ## Intended use
 
-MotionLab is intended for controlled engineering measurement, experimentation,
-and education. Its initial use is to teach and demonstrate measurement-model
-definition, analytical and software verification, camera effects, reference
-method characterization, agreement analysis, uncertainty, and engineering
-decision-making.
+MotionLab is intended as a compact engineering and portfolio project that
+demonstrates:
+
+- reuse of mature technical tools instead of unnecessary reimplementation;
+- mathematical and software verification of the project-specific angle layer;
+- reproducible source-to-result traceability;
+- controlled experimental execution;
+- evidence-bounded engineering conclusions.
 
 ## Primary measurand
 
 The primary measurand is the **2D projected sagittal-plane knee flexion angle**
-derived from projected thigh and shank segment geometry in the image plane.
-The working landmark roles are:
+derived from projected hip, knee, and ankle landmark roles in the image plane.
 
-- proximal point: projected lateral hip reference;
-- vertex: projected lateral knee reference;
-- distal point: projected lateral ankle reference.
-
-The working convention assigns 0° to projected full extension and increasing
-positive values to projected flexion. M3 must formally derive this convention,
-define coordinates and edge cases, and verify known-angle geometries before the
-implementation is treated as verified.
+The project convention assigns 0° to projected full extension and increasing
+positive values to projected flexion. The underlying generic included-angle
+geometry is already analytically verified and unit-tested in M3.
 
 This is an image-plane measurand. It is not a full anatomical three-dimensional
 knee joint angle.
 
-## Measurement-system boundary
+## Core system boundary
 
-The system boundary begins with a source video and its acquisition metadata. It
-includes camera geometry, image dimensions, timing, pose-engine outputs,
-landmark semantics, coordinate conversion, quality handling, angle calculation,
-optional predefined processing, reference digitization, configuration, and
-derived results. It ends with traceable measurement outputs and an engineering
-decision for the stated intended use.
+The simplified Core begins with an original smartphone video and ends with
+traceable project results and a bounded engineering conclusion.
 
-The participant, movement instructions, camera placement, lighting, reference
-markers, and operator decisions are external inputs that can affect the
-measurement and therefore must be controlled, recorded, or characterized.
+```text
+source video
+→ source hash and metadata
+→ Sports2D / RTMPose landmark generation
+→ explicit hip/knee/ankle adapter
+→ MotionLab verified angle geometry
+→ compact result and technical figure
+→ repeated-trial descriptive analysis
+→ bounded conclusion
+```
 
-## Validation architecture
-
-1. **Layer A — Analytical and software verification:** synthetic coordinates,
-   known angles, edge cases, and unit tests.
-2. **Layer B — Physical geometry and camera verification:** planar reference
-   geometry, pixel conversion, projection, perspective, and image sensitivity.
-3. **Layer C — Human-compatible reference characterization:** same-video manual
-   digitization of visible standardized lateral reference markers, including
-   operator and semantic limitations.
-4. **Layer D — Controlled baseline validation:** independent squat trials under
-   a fixed acquisition protocol, comparing markerless and reference estimates.
-5. **Layer E — Robustness experiments:** selected factors evaluated only after
-   baseline performance is understood.
-
-Each layer supports different claims. Passing a lower layer does not establish
-validity at a higher layer.
+Sports2D is a replaceable external pose-engine component. MotionLab does not
+reimplement pose detection, tracking, model inference, generalized filtering,
+or camera-calibration infrastructure.
 
 ## In scope
 
 - one principal 2D projected knee-flexion measurand;
 - standardized single-camera smartphone video;
 - controlled bodyweight squats;
-- analytical and software verification;
-- camera/image-coordinate verification;
-- characterization of an accessible same-video 2D reference method;
-- independent pilot and confirmatory datasets;
-- agreement, error, repeatability, uncertainty, and selected robustness work;
-- raw-first data handling and traceability;
-- an explicit engineering decision for the intended use;
-- educational translation after the measurement decision is complete.
+- source-video hashing and metadata inspection;
+- one pinned Sports2D/RTMPose workflow;
+- explicit mapping of external pixel landmarks to MotionLab landmark roles;
+- MotionLab angle computation using the verified project convention;
+- one end-to-end representative-video demonstration;
+- a small Core dataset of five independent one-squat video trials;
+- simple descriptive summaries and failure counts;
+- reproducible configuration and software/model version records;
+- a concise technical report and public release with bounded claims.
 
-## Out of scope for the Core project
+## Out of scope for the Core
 
-- clinical or diagnostic use;
-- injury detection, risk prediction, or rehabilitation assessment;
+- clinical, diagnostic, injury-risk, or rehabilitation use;
 - claims of anatomical 3D joint-angle measurement;
 - equivalence to Vicon or professional marker-based motion capture;
-- replacement of clinical or research-grade motion-capture systems;
-- population-level or athlete-performance claims;
-- simultaneous expansion to hip and ankle measurands;
-- unnecessary cloud, database, distributed, or ML-training infrastructure.
+- population-level, athlete-performance, or multi-participant claims;
+- multiple pose-engine benchmarking;
+- generalized intrinsic or lens calibration;
+- full yaw, pitch, roll, height, distance, or device robustness matrices;
+- mandatory manual reference validation;
+- full GUM-style uncertainty budgets;
+- Monte Carlo uncertainty propagation;
+- 3D reconstruction, multi-camera workflows, OpenSim, or inverse kinematics;
+- unnecessary cloud, database, ML-training, or distributed infrastructure.
 
-Advanced extensions require completion of the Core evidence chain and a
-documented scope decision.
+## Optional work after Core completion
 
-## Stakeholders and audiences
+### Kinovea manual reference appendix
 
-- project owner and primary learner: Emmanuel Naranjo Blanco;
-- engineering and biomechanics reviewers;
-- measurement, statistics, and laboratory specialists;
-- engineering educators and accreditation-aware evaluators;
-- engineering recruiters;
-- future Naranjo Performance Lab audiences.
+A small independent Kinovea comparison may be added after the Core is finished
+if it materially improves the technical report. It is not required for Core
+completion and must not be described as ground truth.
+
+### Optional Advanced MATLAB Verification Appendix
+
+MATLAB may be used as an independent secondary verification layer for angle
+geometry, analytical cases, deterministic sensitivity, experimental-analysis
+replay, and Python-to-MATLAB numerical consistency. MATLAB runtime completion is
+not required for the Core release.
+
+## Evidence architecture
+
+The simplified project uses three evidence layers:
+
+1. **Analytical/software evidence:** known geometries, edge cases, unit tests,
+   coordinate conversion, and numerical implementation.
+2. **Controlled workflow evidence:** one fixed camera baseline, explicit
+   software/model configuration, traceable video-to-landmark-to-angle processing.
+3. **Repeated-trial evidence:** a small set of independent controlled squat
+   videos used to describe observed within-protocol behavior.
+
+An optional Kinovea appendix may later add an independent comparison layer, but
+that layer is not part of the Core acceptance path.
+
+## M4 closure under simplified scope
+
+M4 is complete for the Core because the repository already contains:
+
+- automated normalized-to-pixel and image-geometry verification;
+- synthetic image tests;
+- video metadata and source-hashing support;
+- a real smartphone acquisition;
+- repeated planar-target digitization evidence;
+- the M4-D center-versus-right experiment;
+- a provisional choice to use centered horizontal framing under the tested
+  setup.
+
+This closure does not establish a general camera calibration or universal setup
+tolerances.
+
+## Core completion criterion
+
+The Core is complete when:
+
+- a pinned Sports2D workflow produces traceable pixel landmarks;
+- MotionLab ingests those landmarks and computes its own projected knee angle;
+- one representative video demonstrates the complete pipeline;
+- five independent controlled squat videos are processed with the frozen Core
+  configuration;
+- compact descriptive results and failures are reported;
+- limitations and claim boundaries are explicit;
+- a short technical report and reproducible repository release are published.
+
+Completion does not require a favorable performance result.
 
 ## Governing principles
 
-- measurement problem first; pose technology is a component, not the project;
-- raw information is preserved and derived transformations are traceable;
-- frames are observations, not automatically independent experimental units;
-- pilot and confirmatory data remain separate;
-- acceptance criteria are frozen before confirmatory analysis;
-- correlation does not establish agreement;
-- the reference method is characterized rather than called ground truth;
-- uncertainty sources are labeled by their evidential basis;
-- negative results are acceptable;
-- public claims do not exceed the available evidence.
+- reuse mature tools when they already solve the non-project-specific problem;
+- keep MotionLab small and testable;
+- preserve raw/source provenance and derived-output traceability;
+- external engine outputs are inputs, not unquestioned truth;
+- MotionLab owns its angle convention and project interpretation;
+- independent trials, not frame count, support repeated-trial summaries;
+- optional work must not silently become a blocking Core requirement;
+- negative or limited results are acceptable;
+- public claims must not exceed the evidence actually produced.
 
-## M1 deliverables
+## Scope-control rule
 
-- this project charter;
-- a uniquely identified, testable requirements baseline;
-- a controlled terminology baseline;
-- README links to the project-definition documents.
+A proposed task enters the Core only if it is necessary to run or interpret the
+end-to-end workflow, cannot reasonably be supplied by an existing mature tool,
+and materially affects the final bounded conclusion.
 
-## M1 acceptance criteria
-
-- intended use, engineering question, measurand, system boundary, scope, and
-  exclusions are explicit and mutually consistent;
-- requirements use unique identifiers and name a verification method and target
-  milestone;
-- terminology distinguishes error, agreement, repeatability, uncertainty,
-  reference measurement, and projected angle concepts;
-- no numerical performance threshold or unsupported validity claim is invented;
-- M0 tests continue to pass and the documentation passes repository checks.
-
-## Risks and controls
-
-| Risk | Consequence | Current control |
-|---|---|---|
-| Scope expansion | Core evidence becomes shallow | One measurand; advanced work deferred |
-| Semantic landmark mismatch | Systematic disagreement | Characterize reference and model landmark meanings |
-| Pseudoreplication | Overstated precision | Define the experimental unit before analysis |
-| Reference treated as truth | Unsupported accuracy claim | Quantify and report reference limitations |
-| Data leakage or privacy loss | Ethical and reputational harm | Local raw data, Git exclusions, sanitized public samples |
-| Post hoc success criteria | Biased decision | Freeze protocol, SAP, and criterion before confirmation |
-| Tool-driven design | Measurement purpose becomes secondary | Maintain technology-independent requirements |
-
-## Git checkpoint
-
-The planned coherent checkpoint is:
-
-```text
-docs: define MotionLab charter and requirements
-```
-
-M2 must not begin until this M1 baseline is reviewed and committed.
+Otherwise it is optional or future work.

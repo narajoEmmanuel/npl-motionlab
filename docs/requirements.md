@@ -1,88 +1,108 @@
 # Engineering Requirements
 
-## Purpose and interpretation
+## Purpose
 
-This document translates the project charter into a traceable baseline. `Shall`
-denotes a required property. Verification milestones identify when evidence is
-expected; they do not imply that the requirement is already satisfied.
+This document defines the simplified Core requirements adopted on 2026-09-16.
+Requirements that belonged to the previous larger validation program are now
+optional or deferred unless explicitly listed here.
 
-Status values are **Defined**, **Verified**, and **Deferred**. All Core
-requirements are currently Defined unless explicitly stated otherwise. Evidence
-will be linked as later milestones are completed.
+Status values are **Defined**, **Verified**, **Deferred**, and **Optional**.
 
 ## Scope and measurand
 
-| ID | Requirement | Rationale | Verification | Target |
+| ID | Requirement | Verification | Target | Status |
 |---|---|---|---|---|
-| ML-SCP-001 | The Core system shall estimate one principal measurand: 2D projected sagittal-plane knee flexion angle. | Protects depth and interpretability. | Charter and design inspection | M1 |
-| ML-SCP-002 | The Core movement shall be a controlled bodyweight squat recorded using a standardized single-camera setup. | Bounds the initial intended use. | Protocol inspection | M10 |
-| ML-SCP-003 | Project outputs shall describe the measurand as projected and two-dimensional wherever omission could imply an anatomical 3D angle. | Prevents claim inflation. | Terminology and publication review | M1, M22 |
-| ML-SCP-004 | Clinical, diagnostic, injury, rehabilitation, and professional-motion-capture-equivalence claims shall remain outside the validated use. | Evidence cannot support these uses. | Claims audit | M16, M22 |
+| ML-SCP-001 | The Core system shall estimate one principal measurand: 2D projected sagittal-plane knee flexion angle. | Charter and design inspection | M1 | Verified |
+| ML-SCP-002 | The Core movement shall be a controlled bodyweight squat recorded with one standardized single-camera setup. | Protocol inspection | M7 | Defined |
+| ML-SCP-003 | Public outputs shall identify the measurand as projected and two-dimensional wherever omission could imply anatomical 3D kinematics. | Claims audit | M9 | Defined |
+| ML-SCP-004 | Clinical, diagnostic, injury-risk, rehabilitation, and professional-motion-capture-equivalence claims shall remain outside the Core. | Claims audit | M9 | Defined |
 
-## Measurement model and software
+## Mathematical and software layer
 
-| ID | Requirement | Rationale | Verification | Target |
+| ID | Requirement | Verification | Target | Status |
 |---|---|---|---|---|
-| ML-MOD-001 | The measurement model shall define projected proximal, knee, and distal points; segment vectors; angle convention; coordinate system; units; and invalid geometries. | Makes the measurand operational. | Technical review | M3 |
-| ML-MOD-002 | Normalized image coordinates shall be converted using image width and height before Euclidean angle geometry is evaluated. | Avoids anisotropic normalized-coordinate error. | Analytical cases and unit tests | M3–M4 |
-| ML-MOD-003 | The numerical implementation shall handle zero-length segments explicitly and constrain inverse-cosine input against floating-point excursion. | Prevents undefined or unstable results. | Edge-case tests | M3 |
-| ML-MOD-004 | Known-angle tests shall include 30°, 45°, 60°, 90°, 120°, and 180° geometries within a documented numerical tolerance. | Verifies the core geometry. | Automated unit tests | M3 |
-| ML-SW-001 | Scientific code shall be modular, testable, typed where useful, and separated from notebooks. | Supports review and reuse. | Code review and tests | M3 onward |
-| ML-SW-002 | Important software, model, and processing versions shall be recorded with derived outputs. | Supports reproducibility. | Metadata inspection | M6–M8 |
-| ML-SW-003 | Raw landmarks and raw angles shall be preserved before optional filtering or smoothing. | Protects evidence and reanalysis. | Pipeline and data audit | M6–M8 |
+| ML-MOD-001 | MotionLab shall define proximal/hip, knee, and distal/ankle landmark roles, segment vectors, angle convention, units, and invalid geometries. | Technical review | M3 | Verified |
+| ML-MOD-002 | Normalized image coordinates shall be converted using image width and height before Euclidean angle geometry when normalized coordinates are used. | Analytical cases and tests | M3-M4 | Verified |
+| ML-MOD-003 | The numerical implementation shall reject degenerate zero-length segments and use a numerically stable included-angle formulation. | Edge-case tests | M3 | Verified |
+| ML-MOD-004 | Known-angle automated tests shall cover representative acute, right, obtuse, and straight geometries within documented tolerance. | Automated tests | M3 | Verified |
+| ML-SW-001 | Project-specific scientific code shall remain modular and testable. | Code review and tests | Ongoing | Verified |
+| ML-SW-002 | Important MotionLab, Sports2D, pose-model, and processing versions/configuration shall be recorded with derived outputs. | Output/configuration audit | M5-M9 | Defined |
+| ML-SW-003 | Sports2D landmark outputs shall be treated as external inputs and explicitly mapped into MotionLab landmark roles. | Adapter tests and inspection | M5 | Defined |
+| ML-SW-004 | MotionLab, not Sports2D, shall compute the authoritative project angle used in Core results. | Pipeline inspection and tests | M5-M6 | Defined |
+| ML-SW-005 | Missing or invalid landmarks shall not be silently replaced with fabricated coordinates. | Adapter/pipeline tests | M5-M6 | Defined |
 
-## Camera and reference method
+## Acquisition and provenance
 
-| ID | Requirement | Rationale | Verification | Target |
+| ID | Requirement | Verification | Target | Status |
 |---|---|---|---|---|
-| ML-CAM-001 | Acquisition records shall identify resolution, image dimensions, orientation, and relevant camera configuration. | Camera geometry is part of the instrument. | Metadata inspection | M4, M8 |
-| ML-CAM-002 | Baseline acquisition shall control or record camera position, height, orientation, distance, subject orientation, resolution, and lighting. | Limits uncontrolled variation. | Protocol and trial-record audit | M10–M11 |
-| ML-REF-001 | The reference measurement shall be derived independently from manually digitized visible reference markers in the same video unless a documented decision selects a superior accessible method. | Enables synchronized comparison without claiming unavailable instrumentation. | Method inspection and ADR | M7 |
-| ML-REF-002 | Reference characterization shall address placement, visibility, digitization, resolution, operator repeatability, and semantic mismatch. | The reference is not automatically ground truth. | Reference study report | M7 |
-| ML-REF-003 | Reference uncertainty shall be quantified or explicitly listed as unquantified before the final engineering decision. | Prevents overstated conclusions. | Uncertainty budget review | M13, M16 |
+| ML-CAM-001 | Source-video records shall retain file identity, decoded image dimensions, and available camera/video metadata relevant to interpretation. | Metadata inspection | M4 onward | Verified |
+| ML-CAM-002 | The Core repeated-trial dataset shall use one fixed practical acquisition configuration and centered framing based on the bounded M4 evidence. | Protocol and dataset audit | M7 | Defined |
+| ML-DAT-001 | Original identifiable videos shall remain private by default and shall not be committed to the public repository. | Git/release audit | Ongoing | Verified |
+| ML-DAT-002 | Each derived result shall remain linkable to its source video identifier, engine/configuration version, and code revision. | Traceability audit | M6-M9 | Defined |
 
-## Experimental design and statistics
+## Sports2D integration
 
-| ID | Requirement | Rationale | Verification | Target |
+| ID | Requirement | Verification | Target | Status |
 |---|---|---|---|---|
-| ML-EXP-001 | The analysis shall identify the experimental unit and account for the subject–session–trial–frame hierarchy. | Avoids pseudoreplication. | Protocol and SAP review | M10 |
-| ML-EXP-002 | Independent repeated trials shall support repeatability or agreement claims; frame count alone shall not be represented as independent sample size. | Aligns evidence with the question. | Dataset and analysis audit | M11–M12 |
-| ML-EXP-003 | Pilot data shall remain distinguishable from confirmatory data. | Prevents data-dependent confirmation. | Dataset provenance audit | M9–M11 |
-| ML-EXP-004 | The protocol, statistical analysis plan, exclusions, and acceptance criterion shall be frozen before confirmatory analysis. | Limits post hoc bias. | Versioned freeze records | M10 |
-| ML-STA-001 | Primary metrics shall answer predefined engineering questions about error, agreement, repeatability, failure, or uncertainty. | Avoids statistical theater. | SAP traceability review | M10 |
-| ML-STA-002 | Correlation or R² shall not be used as evidence of agreement, and statistical significance shall not substitute for engineering relevance. | Prevents common interpretation errors. | Analysis review | M12 |
-| ML-STA-003 | Confirmatory estimates shall include uncertainty intervals when justified by the design and assumptions. | Communicates estimation precision. | Analysis and assumptions review | M12–M13 |
+| ML-POSE-001 | The Core shall use one explicitly pinned Sports2D/RTMPose workflow rather than multiple pose engines. | Environment/config inspection | M5 | Defined |
+| ML-POSE-002 | The integration shall preserve pixel-coordinate meaning or document and test any required coordinate conversion. | Adapter test | M5 | Defined |
+| ML-POSE-003 | Hip, knee, and ankle output columns shall be mapped explicitly to MotionLab landmark roles. | Known-record adapter test | M5 | Defined |
+| ML-POSE-004 | Optional interpolation, filtering, or outlier processing shall remain disabled unless a concrete Core problem justifies enabling it. | Config inspection | M5-M6 | Defined |
 
-## Uncertainty and engineering decision
+## Core experiment
 
-| ID | Requirement | Rationale | Verification | Target |
+| ID | Requirement | Verification | Target | Status |
 |---|---|---|---|---|
-| ML-UNC-001 | Each uncertainty contribution shall be labeled as experimentally quantified, literature informed, instrument specified, estimated, modeled, exploratory, or unquantified. | Makes evidential strength visible. | Uncertainty-budget audit | M13 |
-| ML-UNC-002 | Exploratory Monte Carlo inputs shall not be presented as measured uncertainty. | Prevents modeled assumptions becoming facts. | Simulation report review | M14 |
-| ML-DEC-001 | Acceptance criteria shall distinguish literature-informed, project-defined engineering, and exploratory origins. | Makes criterion provenance explicit. | Decision record review | M10, M16 |
-| ML-DEC-002 | The final decision shall state acceptable, conditionally acceptable, or unacceptable for the bounded intended use and shall document accepted and rejected uses. | Forces an actionable, limited conclusion. | Decision report inspection | M16 |
+| ML-EXP-001 | One representative video shall demonstrate the complete source-to-angle workflow before the Core dataset is processed. | End-to-end run | M6 | Defined |
+| ML-EXP-002 | The Core dataset shall contain five independent one-squat video trials under the same fixed practical setup. | Dataset audit | M7 | Defined |
+| ML-EXP-003 | One predefined event-summary rule shall be frozen before processing the five Core trials. | Protocol/version inspection | M6-M7 | Defined |
+| ML-EXP-004 | Frame count shall not be represented as independent replicate count. | Analysis review | M8 | Defined |
 
-## Data governance and reproducibility
+## Core analysis and conclusion
 
-| ID | Requirement | Rationale | Verification | Target |
+| ID | Requirement | Verification | Target | Status |
 |---|---|---|---|---|
-| ML-DAT-001 | Raw data shall be immutable and traceable to reference, interim, processed, and public or synthetic derivatives. | Preserves provenance. | Data-layout and checksum audit | M8 |
-| ML-DAT-002 | Session, trial, source video, reference data, configuration, software/model version, output, and figure identifiers shall be linkable. | Enables reproduction and investigation. | Traceability audit | M8 |
-| ML-DAT-003 | Identifiable human video and private metadata shall not be committed or published by default. | Protects privacy. | Git and release audit | M0 onward |
-| ML-REP-001 | `pyproject.toml` shall remain the primary dependency declaration, with an exact resolved environment recorded at reproducibility checkpoints. | Avoids contradictory environments. | Configuration inspection | M0 onward |
-| ML-REP-002 | Automated tests shall accompany mathematical and software claims. | Connects claims to evidence. | Test and evidence review | M3 onward |
-| ML-REP-003 | Public results shall be reproducible from documented inputs, configurations, code versions, and procedures, subject to privacy restrictions. | Supports independent engineering review. | Reproduction exercise | M22 |
+| ML-STA-001 | The Core analysis shall remain descriptive unless a specific later question requires inferential statistics. | Analysis review | M8 | Defined |
+| ML-STA-002 | At minimum the Core shall report one predefined event result per trial, mean, standard deviation, minimum, maximum, range, and processing failure/missing-landmark count. | Results audit | M8 | Defined |
+| ML-STA-003 | At least one representative full angle time series shall be retained as technical evidence of the workflow. | Figure/result inspection | M8 | Defined |
+| ML-DEC-001 | The final conclusion shall apply only to the tested single-camera configuration and workflow. | Technical report review | M9 | Defined |
+| ML-DEC-002 | Project completion shall not depend on achieving a favorable numeric result. | Decision/report review | M9 | Defined |
+| ML-REP-001 | The public repository shall document how to reproduce the Core computational workflow subject to privacy restrictions on source videos. | Reproduction review | M9 | Defined |
 
-## Deferred Advanced requirements
+## Optional requirements
 
-Hip and ankle angles, multiple participants or devices, multiple raters,
-factorial robustness designs, advanced filtering comparisons, and additional
-movements are not Core requirements. They require a documented scope change and
-must not delay the Core evidence chain.
+### Kinovea manual reference appendix
+
+| ID | Requirement | Verification | Status |
+|---|---|---|---|
+| ML-OPT-KIN-001 | If a Kinovea appendix is performed, the software version, manual procedure, selected Core trials, and paired-difference convention shall be documented. | Appendix inspection | Optional |
+| ML-OPT-KIN-002 | Kinovea shall not be called ground truth. | Claims audit | Optional |
+
+### Optional Advanced MATLAB Verification Appendix
+
+| ID | Requirement | Verification | Status |
+|---|---|---|---|
+| ML-OPT-MAT-001 | If the MATLAB appendix is completed, its implementation and runtime/version shall be recorded separately from Core claims. | Appendix inspection | Optional |
+| ML-OPT-MAT-002 | Python-to-MATLAB agreement may support implementation-consistency claims only, not pose or biomechanical validity. | Claims audit | Optional |
+
+## Deferred advanced work
+
+The following are not Core requirements:
+
+- full camera intrinsic/lens calibration;
+- systematic yaw, pitch, roll, height, distance, and multi-device studies;
+- multiple pose-engine benchmarking;
+- multiple participants or population inference;
+- mandatory manual-reference validation;
+- full GUM-style uncertainty budgets;
+- Monte Carlo uncertainty propagation;
+- robustness matrices;
+- 3D, multi-camera, OpenSim, or inverse-kinematics workflows;
+- accreditation or teaching-module expansion.
 
 ## Requirement-change control
 
-A material requirement change shall record its context, rationale, consequences,
-and affected evidence. After the M10 freeze, changes affecting confirmatory
-interpretation shall be versioned and disclosed rather than silently replacing
-the frozen plan.
+A new mandatory requirement shall be added only when it is necessary to run or
+interpret the end-to-end Core workflow, cannot reasonably be supplied by an
+existing mature tool, and would materially weaken the final bounded conclusion
+if omitted.

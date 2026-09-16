@@ -1,234 +1,106 @@
-# Guía de ejecución y traspaso de M4
+# Guía de traspaso de M4, estado histórico
 
-Estado actual: `baseline_001` ya fue capturado y digitalizado cuatro veces.
-Consulta el [registro de evidencia y propuesta M4-D](baseline_001_readiness.md)
-para los resultados, las limitaciones, los registros faltantes y la secuencia
-propuesta de siete capturas. Esa secuencia ya fue ejecutada y su
-[análisis de posición horizontal](m4d01_results.md) respalda provisionalmente
-el encuadre horizontal centrado bajo las condiciones probadas. Las secciones de
-preparación siguientes describen el procedimiento original. M4 sigue
-incompleto; no se inicia M5.
+## Estado actual
 
-## Estado al 8 de septiembre de 2026
+**M4 está cerrado bajo el alcance Core simplificado adoptado el 16 de septiembre
+de 2026.**
 
-M4 — Verificación de cámara e imagen — está iniciado, pero no está completo.
-La parte de software y las verificaciones con geometría analítica y archivos
-sintéticos están implementadas. Faltan la captura representativa del teléfono,
-las pruebas físicas con un objeto planar y la selección de una configuración
-de cámara sustentada por esos resultados.
+Este archivo ya no es una lista de tareas pendientes para poder avanzar. Se
+conserva como guía histórica de cómo se construyó la evidencia M4 y como punto
+de referencia para reproducir o extender ese trabajo en el futuro.
 
-El repositorio tiene 59 pruebas automatizadas aprobadas. Los cambios iniciales
-de M4 están contenidos en estos commits:
+La decisión vigente de alcance está en:
 
-- `0798f6c feat: start camera and image verification`
-- `e5defa0 feat: add video metadata inspection`
+- [`../roadmap.md`](../roadmap.md)
+- [`../decisions/ADR-0003-simplified-core-scope.md`](../decisions/ADR-0003-simplified-core-scope.md)
+- [`camera_image_verification.md`](camera_image_verification.md)
 
-## Qué se implementó
+## Evidencia M4 que se conserva
 
-### M4-A — Conversión de coordenadas
+El repositorio ya contiene:
 
-`src/motionlab/image_geometry.py` introduce:
+- conversión verificada de coordenadas normalizadas a píxeles;
+- pruebas de geometría con imágenes sintéticas;
+- inspección de video y hashing de archivos fuente;
+- una adquisición real `baseline_001`;
+- cuatro digitalizaciones manuales del primer cuadro de referencia;
+- una secuencia física M4-D de siete capturas;
+- análisis center-versus-right;
+- una decisión provisional de mantener el sujeto o blanco centrado
+  horizontalmente bajo el setup Core.
 
-- `ImageSize`, que exige ancho y alto positivos y enteros;
-- `normalized_to_pixel`, que escala `x` por el ancho y `y` por el alto;
-- `angle_from_normalized_points_deg`, que convierte antes de calcular el
-  ángulo.
+Consulta:
 
-Las coordenadas se conservan como posiciones continuas. No se redondean a
-índices de píxel y no se recortan al intervalo `[0, 1]`. Esto permite conservar
-un landmark que el modelo reporte fuera de la imagen para que la política de
-calidad se defina después, sin modificar silenciosamente el dato crudo.
+- [`baseline_001_readiness.md`](baseline_001_readiness.md)
+- [`m4d01_registration.md`](m4d01_registration.md)
+- [`m4d01_results.md`](m4d01_results.md)
 
-Las pruebas demuestran que calcular directamente con coordenadas normalizadas
-en una imagen no cuadrada puede producir un error angular material. También
-verifican la recuperación de un ángulo conocido en formatos horizontal 16:9,
-4:3 y vertical 9:16. Este bloque aporta evidencia para `ML-MOD-002`.
+## Qué significan esos resultados
 
-### M4-B — Imágenes sintéticas
+M4 demuestra comportamiento de software e imagen dentro de las condiciones
+ensayadas. No demuestra una calibración universal de cámara.
 
-`tests/test_synthetic_image_geometry.py` construye marcadores con geometría
-conocida, codifica la imagen como PNG, la vuelve a decodificar y recupera
-ángulos agudos, rectos y obtusos desde los centroides observados. Así se prueba
-una ruta de imagen real, aunque todavía sin lente, perspectiva ni compresión de
-video de un teléfono.
+La secuencia M4-D apoya el uso de encuadre horizontal centrado para el siguiente
+workflow controlado. No permite extender esa conclusión a otros teléfonos,
+lentes, posiciones de cámara o escenarios.
 
-### M4-C — Inspección de video
+## Configuración práctica que pasa al Core
 
-`src/motionlab/video_metadata.py` inspecciona un archivo sin modificarlo y
-genera un registro JSON con:
+Para los siguientes milestones se mantendrá, en la medida práctica:
 
-- nombre original, extensión, tamaño y checksum SHA-256;
-- ancho y alto del primer cuadro realmente decodificado;
-- conteo de cuadros y FPS nominal informados por el backend;
-- duración derivada de esos dos valores;
-- códec FOURCC y backend de captura;
-- orientación informada por el backend;
-- notas que limitan la interpretación de orientación y temporización.
+1. el mismo smartphone;
+2. el mismo modo de cámara/lente del baseline escogido;
+3. la misma orientación;
+4. el mismo tipo de soporte;
+5. altura y distancia aproximadamente consistentes;
+6. vista aproximadamente sagital;
+7. sujeto centrado horizontalmente;
+8. iluminación y zona de captura razonablemente consistentes;
+9. archivo original privado sin recomprimir;
+10. checksum, dimensiones decodificadas y metadatos relevantes registrados.
 
-El inspector se probó de extremo a extremo con un video AVI generado durante
-la suite. También se verificaron archivos inexistentes o no decodificables y la
-exportación JSON desde la línea de comandos.
+No se necesitan tolerancias numéricas completas para cada variable antes de
+continuar.
 
-El FPS del encabezado no demuestra que el archivo tenga cuadros igualmente
-espaciados. La duración calculada tampoco sustituye la inspección de timestamps.
-Una orientación de 0° puede significar cero rotación o metadatos no disponibles.
-Estas limitaciones se conservan explícitamente para evitar conclusiones falsas.
+## Trabajo M4 que pasa a futuro, no a la ruta crítica
 
-## Qué no se ha demostrado todavía
+No es necesario ejecutar ahora:
 
-M4 no contiene evidencia física sobre:
+- barridos de yaw, pitch o roll;
+- múltiples alturas o distancias;
+- comparación de todos los lentes;
+- calibración intrínseca completa;
+- mapa de distorsión de lente;
+- experimentos factoriales con HDR o estabilización;
+- repetibilidad de desmontaje y remontaje;
+- tolerancias universales de montaje;
+- caracterización general de múltiples smartphones.
 
-- el teléfono, lente o aplicación que se utilizarán;
-- distorsión óptica, zoom digital, HDR o estabilización;
-- velocidad de cuadros constante o variable;
-- rotación y recorte efectivos del archivo del teléfono;
-- sensibilidad a yaw, pitch, roll, altura o distancia;
-- repetibilidad al desmontar y reinstalar la cámara;
-- tolerancias aceptables para el montaje;
-- validez de landmarks humanos o acuerdo con la referencia manual.
+Estas extensiones solo deben retomarse si aparece un problema concreto durante
+la integración o si más adelante se decide estudiar robustez de forma explícita.
 
-Por tanto, M4 aún no permite declarar una configuración de adquisición validada.
+## Herramientas M4 retenidas
 
-## Lo que debes preparar
+Los siguientes componentes no se eliminan porque siguen teniendo valor para
+trazabilidad, pruebas o futuras extensiones:
 
-Necesitas:
+- `src/motionlab/image_geometry.py`
+- `src/motionlab/video_metadata.py`
+- `scripts/manual_digitize_m4.py`
+- `scripts/register_m4d01.py`
+- `scripts/digitize_m4d01_batch.py`
+- `scripts/analyze_m4d01.py`
+- `docs/metrology/acquisition_record_template.yaml`
 
-1. el teléfono y la aplicación de cámara que planeas usar;
-2. un soporte estable o trípode;
-3. una cinta métrica y, si es posible, un nivel;
-4. un blanco planar rígido con al menos tres centros de alto contraste;
-5. una medida independiente de las distancias y del ángulo entre esos centros;
-6. una marca asimétrica que permita detectar rotaciones o reflejos;
-7. un espacio donde puedas repetir posición, altura, distancia e iluminación.
+No forman una obligación de seguir haciendo experimentos de cámara.
 
-No uses todavía una persona como blanco de M4. Primero debe caracterizarse el
-comportamiento de cámara e imagen con geometría planar conocida.
+## Siguiente paso vigente
 
-## Primera captura representativa — M4-C
+El siguiente milestone es **M5, Sports2D Integration**.
 
-Actualización de preparación (2026-09-09): la lista exacta de entrega de
-`baseline_001`, el blanco nominal 3-4-5 y la cadena de evidencia están en
-[el protocolo M4](camera_image_verification.md#first-representative-acquisition-baseline_001).
-Usa `target_record_path` para enlazar la descripción privada del blanco.
-Ya existen cuatro digitalizaciones manuales del primer cuadro; su dispersión
-solo caracteriza sensibilidad exploratoria de los clics. La caracterización
-completa de localización y los experimentos físicos siguen pendientes.
+La prioridad ahora es integrar una única versión/configuración de Sports2D,
+obtener landmarks de cadera, rodilla y tobillo en píxeles, mapearlos a
+MotionLab y dejar que la geometría ya verificada de MotionLab calcule el ángulo
+autoritativo del proyecto.
 
-### 1. Conserva el archivo original
-
-Crea el área privada local:
-
-```powershell
-New-Item -ItemType Directory -Path data\raw\m4 -Force
-```
-
-Coloca allí el archivo original del teléfono. No lo recortes, renombres,
-transcodifiques ni envíes por una aplicación que pueda recomprimirlo. Todo
-`data/raw/` está excluido de Git.
-
-### 2. Registra lo que configuraste
-
-Copia la plantilla versionada:
-
-```powershell
-Copy-Item docs\metrology\acquisition_record_template.yaml `
-  data\raw\m4\baseline_001_acquisition.yaml
-```
-
-Completa los campos que puedas observar: teléfono, sistema operativo,
-aplicación, resolución solicitada, FPS solicitado, orientación, lente, zoom,
-estabilización, HDR, enfoque, exposición, balance de blancos, soporte, altura,
-distancia y orientación física. Usa `null` cuando un valor no esté disponible;
-no lo deduzcas visualmente.
-
-### 3. Inspecciona el archivo
-
-Sustituye `<video>` por el nombre real:
-
-```powershell
-.\.venv\Scripts\python.exe -m motionlab.video_metadata `
-  data\raw\m4\<video> `
-  --output data\raw\m4\baseline_001_metadata.json
-```
-
-No edites el JSON resultante. Si repites el comando sobre el mismo archivo, el
-checksum debe permanecer idéntico.
-
-### 4. Revisa coherencia básica
-
-Compara el YAML y el JSON:
-
-- resolución solicitada frente a dimensiones decodificadas;
-- FPS solicitado frente a FPS nominal informado;
-- orientación esperada frente a dimensiones y orientación informada;
-- lente, zoom y estabilización registrados manualmente;
-- nombre y checksum correspondientes al archivo original.
-
-Una discrepancia se documenta; no se corrige alterando el archivo fuente.
-
-## Secuencia física — M4-D
-
-Esta secuencia es posterior a `baseline_001`. Los niveles se definirán cuando
-se conozcan el dispositivo, espacio, blanco, soporte, geometría y controles.
-Incluye la posición del blanco dentro de la imagen como factor candidato por
-la posible variación de distorsión entre el centro y los bordes, sin fijar niveles.
-
-Antes de observar errores angulares, crea una copia de la plantilla para cada
-condición y fija por escrito los niveles que sean realizables con tu equipo.
-No definas tolerancias después de ver qué condición produjo mejores resultados.
-
-La siguiente lista es un catálogo de factores posteriores. Para la primera
-secuencia usa únicamente la propuesta acotada del registro de baseline_001,
-una vez confirmadas las condiciones de montaje:
-
-1. varias capturas repetidas de la condición baseline sin mover nada;
-2. cambios de una sola variable por vez: yaw, pitch, roll, altura y distancia;
-3. pruebas separadas de cada lente, zoom, estabilización y modo de resolución o
-   FPS que sea candidato para el protocolo;
-4. una prueba de orientación y recorte con el blanco asimétrico;
-5. una captura final de retorno al baseline;
-6. inspección JSON y registro YAML para cada video original.
-
-Mantén constantes el blanco, la iluminación y las variables que no estén bajo
-prueba. Si algo cambia accidentalmente, anótalo; no descartes la captura sin
-dejar registro.
-
-## Qué debes entregar para continuar el análisis
-
-Cuando completes la primera captura, proporciona:
-
-- la ruta local exacta del video dentro de `data/raw/m4/`;
-- el YAML de adquisición completado;
-- el JSON generado por el inspector;
-- las dimensiones físicas y el ángulo nominal del blanco;
-- una descripción de cómo mediste altura, distancia, yaw, pitch y roll;
-- cualquier ajuste que la aplicación no permita controlar.
-
-Con esos insumos se podrá analizar la captura real, decidir los niveles de la
-secuencia M4-D y, después de las pruebas, justificar una configuración baseline
-provisional para M9 y las tolerancias que llegarán al protocolo M10.
-
-## Comandos de comprobación
-
-Ejecuta toda la evidencia automatizada con:
-
-```powershell
-.\.venv\Scripts\python.exe -m pytest -q
-```
-
-El resultado del checkpoint documentado es:
-
-```text
-59 passed
-```
-
-Si este número cambia porque se añaden pruebas, lo importante es que toda la
-suite termine sin fallos y que el nuevo resultado quede registrado.
-
-## Condición de cierre de M4
-
-M4 solo podrá marcarse completo cuando exista al menos un registro real de
-dispositivo y video, se documenten y ejecuten las pruebas planares, se reporten
-los efectos observados dentro de las condiciones ensayadas y se justifique una
-configuración baseline con tolerancias sustentadas por evidencia. El cierre de
-M4 no autoriza afirmaciones clínicas, anatómicas 3D ni de validez de pose humana.
+No se inicia una nueva campaña de cámara antes de M5.
