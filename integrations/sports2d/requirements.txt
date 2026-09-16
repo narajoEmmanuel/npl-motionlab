@@ -1,0 +1,4 @@
+# External pose-engine environment for MotionLab M5.
+# Keep this isolated from the MotionLab package environment.
+sports2d==0.8.34
+Pose2Sim==0.10.49
