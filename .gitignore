@@ -31,3 +31,7 @@ data/raw/
 *.mp4
 *.mov
 *.avi
+
+# Generated MATLAB verification artifacts
+matlab/results/*
+!matlab/results/README.md
