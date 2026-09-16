@@ -47,16 +47,18 @@ Core scope.
 
 **M5: Sports2D Integration** is in progress. The source integration, pinned
 external environment, pixel-TRC adapter, and boundary tests are implemented.
-M5 remains open until the pinned Sports2D environment is executed on one
-representative private video and the resulting pixel TRC is successfully
-consumed by MotionLab.
+The representative private-video runtime checkpoint has also passed: Sports2D
+produced the expected pixel TRC and MotionLab successfully consumed the mapped
+hip, knee, and ankle coordinates while preserving missing landmarks as invalid.
+M5 remains open until the final documentation/PR review is completed and the
+feature branch is merged.
 
 See the [M5 integration audit](docs/m5_sports2d_integration.md) and the
 [Simplified Core roadmap](docs/roadmap.md).
 
 ## Core completion path
 
-1. finish the M5 representative-video runtime checkpoint;
+1. complete the final M5 documentation/PR review and merge;
 2. demonstrate the complete workflow on one representative video;
 3. freeze the simplest stable squat-event summary rule;
 4. collect and process five controlled one-squat video trials;

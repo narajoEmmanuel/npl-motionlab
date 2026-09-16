@@ -34,20 +34,29 @@ original video
 
 ## Install on Windows
 
-Install `uv` if it is not already available, then create the external
+The runtime checkpoint was reproduced with the standard-library `venv` module
+and `pip`, so they are the baseline installation path. Create the external
 environment outside this repository:
 
 ```powershell
-uv venv "$env:USERPROFILE\.venv\sports2d-motionlab" --python 3.13
+py -3.13 -m venv "$env:USERPROFILE\.venv\sports2d-motionlab"
 & "$env:USERPROFILE\.venv\sports2d-motionlab\Scripts\Activate.ps1"
-uv pip install -r integrations\sports2d\requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r integrations\sports2d\requirements.txt
+python -m pip check
 ```
+
+`uv` may be used as an equivalent environment manager, but MotionLab does not
+require it.
 
 Confirm the pinned versions:
 
 ```powershell
 python -c "from importlib.metadata import version; print(version('sports2d')); print(version('Pose2Sim'))"
 ```
+
+The verified M5 runtime used Python `3.13.5`, Sports2D `0.8.34`, and Pose2Sim
+`0.10.49`.
 
 ## Run
 
@@ -84,8 +93,20 @@ For `Body_with_feet`, MotionLab maps by marker name:
 | Right | `RHip` | `RKnee` | `RAnkle` |
 | Left | `LHip` | `LKnee` | `LAnkle` |
 
-MotionLab reads TRC X/Y values as pixels and does not rescale them. The TRC Z
-column is retained by the parser but is not used by the 2D angle calculation.
+MotionLab reads TRC X/Y values from the Sports2D `_px_` output as pixels and
+does not rescale them. The TRC Z column is retained by the parser but is not
+used by the 2D angle calculation.
+
+### Sports2D 0.8.34 TRC unit-label quirk
+
+The Sports2D `0.8.34` function `make_trc_with_trc_data` writes `Units=m` in the
+TRC header for both the pre-conversion pixel TRC and the optional converted
+meter TRC. The pixel file is written before the `to_meters` conversion block.
+
+For the pinned MotionLab boundary, the `_px_` output filename, Sports2D
+processing path, and explicit `to_meters = false` configuration define the
+coordinate domain. MotionLab deliberately does not use the TRC `Units` header
+to decide whether X/Y are pixels.
 
 Sports2D applies its configured confidence thresholds before exporting the pose.
 Low-confidence landmarks can therefore appear as missing/NaN coordinates. The
@@ -103,7 +124,17 @@ existing verified geometry and projected-flexion convention.
 
 ## Runtime checkpoint
 
-M5 source integration can be reviewed and unit-tested without model inference.
-M5 is not complete until the pinned external environment is installed locally
-and produces at least one expected pixel TRC file from a representative private
-video, and that file is successfully ingested by MotionLab.
+The pinned environment has been executed locally on one representative private
+video.
+
+Observed M5 checkpoint:
+
+- 597 Sports2D frames exported;
+- `RHip`, `RKnee`, and `RAnkle` were consumed through the real pixel TRC;
+- 541 rows produced valid MotionLab geometry;
+- 56 rows were preserved as `missing_landmark` with `NaN` projected flexion;
+- the full MotionLab regression suite passed, `64 passed`.
+
+The source video and derived checkpoint artifacts remain private and Git-ignored.
+This smoke check demonstrates the integration boundary only. It does not
+validate Sports2D pose accuracy or biomechanical accuracy.
