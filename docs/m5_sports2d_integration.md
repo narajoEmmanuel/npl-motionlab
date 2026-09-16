@@ -2,12 +2,13 @@
 
 ## Status
 
-**Runtime checkpoint passed, final documentation/PR review pending.**
+**M5 COMPLETE.**
 
 This document records the M5 audit performed on 2026-09-16, the resulting
-minimal integration design, and the representative private-video runtime
-checkpoint. M5 remains open until the documentation and pull request are
-reviewed and the feature branch is merged. M6 has not started.
+minimal integration design, the representative private-video runtime checkpoint,
+and the final pull-request review. All M5 acceptance criteria are satisfied.
+M6 has not started and must begin only after the M5 feature branch is merged to
+`main`.
 
 ## Current MotionLab state
 
@@ -291,8 +292,8 @@ M5 does not:
 6. Install/run the pinned Sports2D environment locally on one representative
    private video. Complete.
 7. Ingest its pixel TRC and inspect mapping/missingness. Complete.
-8. Complete final documentation and PR review, then merge M5 before starting M6.
-   Pending.
+8. Complete final documentation and PR review. Complete.
+9. Merge the completed M5 feature branch before starting M6. Pending.
 
 ## M5 acceptance status
 
@@ -309,8 +310,9 @@ M5 does not:
 | Real Sports2D pixel TRC ingestion | Observed, 541 valid and 56 missing-landmark rows |
 | Full MotionLab regression suite | 64 passed |
 | Private raw/derived artifacts excluded from Git | Maintained by `.gitignore` |
+| Final PR review | Complete, no M5 blocker found |
 
-The technical M5 acceptance evidence is now present. M5 remains **in progress**
-until the final documentation/PR review is complete and the feature branch is
-merged. No inference-performance or biomechanical-validity claim is authorized
-by this milestone.
+M5 is **COMPLETE**. The integration milestone is closed with evidence bounded to
+the tested representative workflow. No inference-performance or biomechanical-
+validity claim is authorized by this milestone. The branch must be merged before
+M6 begins.
