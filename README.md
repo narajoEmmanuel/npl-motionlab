@@ -41,25 +41,24 @@ bounded engineering conclusion
 ```
 
 **M0: Environment & Repository**, **M1: Charter & Requirements**, **M2:
-Literature & Measurement Framework**, **M3: Mathematical Verification**, and
-**M4: Controlled Camera & Image Baseline** are complete under the simplified
-Core scope.
+Literature & Measurement Framework**, **M3: Mathematical Verification**, **M4:
+Controlled Camera & Image Baseline**, and **M5: Sports2D Integration** are
+complete under the simplified Core scope.
 
-**M5: Sports2D Integration** is in progress. The source integration, pinned
-external environment, pixel-TRC adapter, and boundary tests are implemented.
-The representative private-video runtime checkpoint has also passed: Sports2D
-produced the expected pixel TRC and MotionLab successfully consumed the mapped
-hip, knee, and ankle coordinates while preserving missing landmarks as invalid.
-M5 remains open until the final documentation/PR review is completed and the
-feature branch is merged.
+M5 closed with a pinned isolated Sports2D environment, a tested pixel-TRC
+adapter, explicit landmark mapping, preserved missingness, MotionLab-owned angle
+calculation, and one representative private-video runtime checkpoint. Sports2D
+exported 597 frames, MotionLab produced 541 valid geometry rows and preserved 56
+`missing_landmark` rows as invalid with `NaN` projected flexion, and the full
+MotionLab regression suite passed with `64 passed`.
 
 See the [M5 integration audit](docs/m5_sports2d_integration.md) and the
 [Simplified Core roadmap](docs/roadmap.md).
 
 ## Core completion path
 
-1. complete the final M5 documentation/PR review and merge;
-2. demonstrate the complete workflow on one representative video;
+1. merge the completed M5 integration branch;
+2. implement M6 end-to-end source-to-angle orchestration on one representative video;
 3. freeze the simplest stable squat-event summary rule;
 4. collect and process five controlled one-squat video trials;
 5. report simple descriptive results, failures, configuration, and limitations;
