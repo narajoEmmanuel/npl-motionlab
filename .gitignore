@@ -32,6 +32,9 @@ data/raw/
 # Private/derived human analysis artifacts
 data/derived/
 
+# Private/local MotionLab Interactive workspace
+workspace/
+
 *.mp4
 *.mov
 *.avi
