@@ -1,7 +1,9 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { motionlabApi } from "./api";
+import ExportPanel from "./ExportPanel";
 import { ReviewOverlay } from "./ReviewOverlay";
+import ResultsWorkspace from "./ResultsWorkspace";
 import type {
   FrameSnapshot,
   LandmarkRole,
@@ -192,7 +194,7 @@ function App() {
             <span className="status-dot" />
             API {apiStatus}
           </span>
-          <span className="phase-pill">Interactive v0.2 · I5</span>
+          <span className="phase-pill">Interactive v0.2 · completion</span>
         </div>
       </header>
 
@@ -372,13 +374,12 @@ function App() {
               </div>
             </div>
 
-            <div className="panel compact-panel reserved-panel">
-              <span className="eyebrow">Results workspace</span>
-              <h2>Curves & frame table</h2>
-              <div className="reserved-graphic" aria-hidden="true">
-                <span /><span /><span />
-              </div>
-              <p>Reserved for synchronized curves and table navigation in I6. I5 keeps reviewed frame behavior separate from automatic evidence.</p>
+            <div className="panel compact-panel">
+              <ResultsWorkspace
+                session={session}
+                currentFrame={frameIndex}
+                onSelectFrame={(index) => void loadFrame(index)}
+              />
             </div>
           </div>
         </section>
@@ -433,6 +434,9 @@ function App() {
             <div className="legend-row"><span className="legend-dot corrected" />Manual correction active</div>
             <div className="legend-row"><span className="legend-dot invalid" />Missing / invalid</div>
           </div>
+
+          <div className="divider" />
+          <ExportPanel session={session} />
         </aside>
       </main>
     </div>
