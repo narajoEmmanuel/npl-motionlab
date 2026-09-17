@@ -59,10 +59,10 @@ video-processing stack.
 | M3 | Mathematical verification | Known-angle geometry and edge cases verified | Complete |
 | M4 | Controlled camera and image baseline | Pixel conversion verified, one real acquisition characterized, M4-D supports centered framing under tested conditions | Complete under simplified scope |
 | M5 | Sports2D integration | Pinned engine/configuration produces traceable pixel landmarks that MotionLab can ingest | Complete |
-| M6 | End-to-end angle pipeline | One representative video runs from source metadata to MotionLab angle time series and summary without manual coordinate entry | Complete locally |
-| M7 | Small controlled squat dataset | Five independent one-squat video trials collected under the fixed baseline and processed reproducibly | Complete locally |
-| M8 | Final Core analysis | Per-trial outputs and simple descriptive summaries generated with explicit limitations | Complete locally |
-| M9 | Technical conclusion and release | Short report, reproducible public artifacts, README and tagged release completed | Planned |
+| M6 | End-to-end angle pipeline | One representative video runs from source metadata to MotionLab angle time series and summary without manual coordinate entry | Complete |
+| M7 | Small controlled squat dataset | Five independent one-squat video trials collected under the fixed baseline and processed reproducibly | Complete |
+| M8 | Final Core analysis | Per-trial outputs and simple descriptive summaries generated with explicit limitations | Complete |
+| M9 | Technical conclusion and release | Short report, reproducible public artifacts, README and tagged release completed | Release candidate prepared |
 
 Milestones after M4 are intentionally small. New work must demonstrate that it
 changes the final Core conclusion before it is made mandatory.
@@ -82,13 +82,12 @@ Observed integration evidence:
 - the full MotionLab test suite passed, `64 passed`.
 
 This is integration evidence, not pose-accuracy or biomechanical-validity
-evidence. M5 is complete and its feature branch is merged to `main`, satisfying
-the prerequisite for the subsequent M6 implementation.
+evidence. M5 is complete and merged to `main`.
 
 ## M4 closure decision
 
 M4 is considered complete for the simplified Core because the repository
-already contains:
+contains:
 
 - analytical and automated image-coordinate verification;
 - synthetic raster verification;
@@ -105,11 +104,11 @@ tolerances are outside the Core.
 
 ## M5 minimum deliverable
 
-Use a pinned stable Sports2D release and explicit configuration. The initial
-integration should prefer raw pixel landmarks and avoid optional processing
-unless a concrete problem requires it.
+Use a pinned stable Sports2D release and explicit configuration. The integration
+prefers raw pixel landmarks and avoids optional processing unless a concrete
+problem requires it.
 
-The adapter only needs to prove:
+The adapter proves:
 
 - which pose model and Sports2D version produced the landmarks;
 - how hip, knee, and ankle columns map to MotionLab landmark roles;
@@ -122,8 +121,8 @@ No second pose engine is required.
 
 ## M6 minimum deliverable
 
-The exit condition was demonstrated locally on 2026-09-16: the documented
-command reused the M5 TRC, preserved 597 rows (541 valid, 56 missing), generated
+The exit condition was demonstrated on 2026-09-16: the documented command reused
+the M5 TRC, preserved 597 rows (541 valid, 56 missing), generated
 CSV/figure/summary/provenance, and passed 73 tests.
 See [M6 evidence and reproduction](m6_angle_pipeline.md). The selected rule is
 maximum valid projected flexion across the recording, resolving exact ties by
@@ -144,31 +143,30 @@ A one-video smoke test belongs inside M6. It is not a separate pilot milestone.
 
 ## M7 minimum experiment
 
-The default Core dataset is five independent video trials, one controlled
-bodyweight squat per video, using the same phone, camera mode, orientation,
-mounting approach, approximate distance, centered framing, lighting setup, and
-movement instructions.
+The Core dataset is five independent video trials, one controlled bodyweight
+squat per video, using the same phone, camera mode, orientation, mounting
+approach, approximate distance, centered framing, lighting setup, and movement
+instructions.
 
 The purpose is not population inference and not clinical validation. The dataset
 exists only to demonstrate repeatable operation and describe observed variation
 under one bounded setup.
 
-M7 completed locally on 2026-09-16 with five sequential pinned-engine/frozen-M6
-runs, private source metadata and trial manifest, verified output provenance,
-and 73 passing tests. Side and event rule were frozen before processing.
+M7 completed on 2026-09-16 with five sequential pinned-engine/frozen-M6 runs,
+private source metadata and trial manifest, verified output provenance, and 73
+passing tests. Side and event rule were frozen before processing.
 See [M7 acquisition, processing, and completion evidence](m7_controlled_squat_dataset.md).
 M8 consumed these completed artifacts without rerunning processing.
 
 ## M8 minimum analysis
 
-M8 completed locally on 2026-09-16: five validated private event summaries,
+M8 completed on 2026-09-16: five validated private event summaries,
 mean/sample SD (`ddof=1`)/extrema/range, failure and missingness accounting, and
 two inspected figures. The real run recorded clean committed-code provenance;
 the full suite passed with 86 tests. See
 [M8 evidence and bounded interpretation](m8_final_core_analysis.md).
-M9 has not started.
 
-Keep the analysis descriptive. At minimum report:
+The analysis remains descriptive. It reports:
 
 - one result per independent trial for the predefined squat event;
 - mean, standard deviation, minimum, maximum, and range across trials;
@@ -177,25 +175,52 @@ Keep the analysis descriptive. At minimum report:
 - configuration and software/model versions;
 - limitations that prevent accuracy, clinical, 3D, or population claims.
 
-Do not add inferential statistics, ICC, ANOVA, Bland-Altman analysis, confidence
-interval machinery, or uncertainty propagation unless a later optional
-reference experiment creates a specific need.
+Inferential statistics, ICC, ANOVA, Bland-Altman analysis, confidence interval
+machinery, and uncertainty propagation remain outside the Core.
 
 ## M9 completion package
 
-The Core project is finished when the repository contains:
+M9 packages the already completed evidence rather than adding new analysis.
+The release candidate contains:
 
 - the pinned Sports2D integration/configuration;
 - the MotionLab adapter and tested angle pipeline;
-- traceable derived results from the five controlled trials (raw identifiable
-  video remains private by default);
-- a concise technical report;
-- one reproducible results command or documented workflow;
-- a release with evidence-bounded claims.
+- traceable private derived results from the five controlled trials while raw
+  identifiable video remains private;
+- a concise final technical report in `docs/m9_core_release.md`;
+- a reproducible public test/setup workflow;
+- `RELEASE_NOTES.md` for the first bounded Core release;
+- package version `0.1.0`;
+- README and roadmap aligned to the final claim boundary.
+
+The release candidate deliberately does not publish private human videos, TRCs,
+per-frame human results, private manifests, private analysis figures, or hashes
+tied to private recordings.
+
+M9 becomes **Complete** only after the release candidate is reviewed and merged,
+the complete suite passes on the merged release state, tag `v0.1.0` points to
+that final `main` commit, and the GitHub release is published using the prepared
+release notes.
 
 A valid final conclusion can be positive, limited, or negative. Completion does
 not depend on achieving a target angle value or proving agreement with another
 system.
+
+## Final Core conclusion
+
+For the tested controlled protocol, the Core evidence supports the conclusion
+that MotionLab can reproducibly transform controlled single-camera squat video
+into traceable 2D projected knee-flexion results using a pinned external pose
+engine and independently verified MotionLab geometry.
+
+This supports workflow reproducibility, software traceability, and bounded
+repeated execution under the tested conditions. It does not establish
+pose-estimation ground-truth accuracy, anatomical 3D knee kinematics, clinical
+validity, population performance, general reliability across arbitrary setups,
+or equivalence to professional marker-based motion capture.
+
+See [M9 Core release report](m9_core_release.md) for the complete release claim
+boundary.
 
 ## Optional work, explicitly outside the critical path
 
@@ -203,7 +228,7 @@ system.
 
 Kinovea may be used after the Core is complete if an independent manual
 comparison would materially improve the final portfolio or technical report.
-This is not required for M5 through M9.
+It is not required for v0.1.0.
 
 If performed, use only a small predefined subset of Core trials, preserve the
 manual procedure and software version, and report paired differences without
@@ -217,7 +242,7 @@ angle geometry, analytical cases, deterministic sensitivity, and Python to
 MATLAB numerical consistency.
 
 MATLAB completion, MATLAB runtime evidence, and MATLAB figures are not required
-to complete the Core project.
+for v0.1.0.
 
 ### Future work
 
