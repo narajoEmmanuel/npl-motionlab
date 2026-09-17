@@ -12,6 +12,13 @@ htmlcov/
 build/
 dist/
 
+# Node / frontend build artifacts
+node_modules/
+apps/web/node_modules/
+apps/web/dist/
+apps/web/.vite/
+*.tsbuildinfo
+
 # Jupyter
 .ipynb_checkpoints/
 
