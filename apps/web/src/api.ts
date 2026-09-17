@@ -1,5 +1,6 @@
 import type {
   FrameSnapshot,
+  LandmarkRole,
   MeasurementDefinition,
   SessionSnapshot,
   Side,
@@ -70,4 +71,24 @@ export const motionlabApi = {
 
   getFrame: (sessionId: string, frameIndex: number) =>
     request<FrameSnapshot>(`/sessions/${sessionId}/frames/${frameIndex}`),
+
+  correctLandmark: (
+    sessionId: string,
+    frameIndex: number,
+    role: LandmarkRole,
+    payload: { x_px: number; y_px: number; note?: string },
+  ) =>
+    request<FrameSnapshot>(
+      `/sessions/${sessionId}/frames/${frameIndex}/landmarks/${role}/corrections`,
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    ),
+
+  resetLandmark: (sessionId: string, frameIndex: number, role: LandmarkRole) =>
+    request<FrameSnapshot>(
+      `/sessions/${sessionId}/frames/${frameIndex}/landmarks/${role}/correction`,
+      { method: "DELETE" },
+    ),
 };
