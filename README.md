@@ -62,16 +62,21 @@ See [M6 reproduction and output contract](docs/m6_angle_pipeline.md).
 operator-confirmed one-squat recordings were processed sequentially with the
 frozen M6 pipeline, right side, and event rule. Source mapping and results remain
 private; all five runs record clean committed-code provenance, and the full
-suite passed with `73 passed`. M8 has not started.
+suite passed with `73 passed`.
 See [M7 acquisition and processing evidence](docs/m7_controlled_squat_dataset.md).
+
+**M8: Final Core Analysis** is complete locally. Existing M7 event artifacts
+were validated and summarized descriptively, with sample SD (`ddof=1`), private
+machine-readable outputs, five-trial comparison, and a full T01 series selected
+by lowest trial ID. The full suite passed with `86 passed`. M9 has not started.
+See [M8 method, reproduction, and limitations](docs/m8_final_core_analysis.md).
 
 See the [M5 integration audit](docs/m5_sports2d_integration.md) and the
 [Simplified Core roadmap](docs/roadmap.md).
 
 ## Core completion path
 
-1. report simple descriptive results, failures, configuration, and limitations;
-2. publish a concise technical conclusion and reproducible release.
+1. package the bounded technical conclusion and reproducible release in M9.
 
 No second pose engine, manual reference, full uncertainty budget, Monte Carlo
 study, robustness matrix, or generalized camera calibration is required to
