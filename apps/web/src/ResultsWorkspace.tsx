@@ -49,31 +49,20 @@ export default function ResultsWorkspace({ session, currentFrame, onSelectFrame 
     let cancelled = false;
     setLoading(true);
     setError(null);
-    const load = async () => {
-      try {
-        const next: FrameSnapshot[] = [];
-        const batchSize = 24;
-        for (let start = 0; start < session.counts.frames; start += batchSize) {
-          const indices = Array.from(
-            { length: Math.min(batchSize, session.counts.frames - start) },
-            (_, offset) => start + offset,
-          );
-          const batch = await Promise.all(indices.map((index) => motionlabApi.getFrame(session.id, index)));
-          next.push(...batch);
-          if (cancelled) return;
-        }
+    motionlabApi.getFrames(session.id).then(
+      (next) => {
         if (!cancelled) setRows(next);
-      } catch (reason) {
+      },
+      (reason) => {
         if (!cancelled) setError(reason instanceof Error ? reason.message : "Unable to load results");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    void load();
+      },
+    ).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
     return () => {
       cancelled = true;
     };
-  }, [session?.id, session?.status, session?.counts.frames]);
+  }, [session?.id, session?.status, session?.counts.frames, session?.counts.active_manual_corrections]);
 
   const summaries = useMemo(() => {
     return Object.fromEntries(
