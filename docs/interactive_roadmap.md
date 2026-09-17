@@ -10,10 +10,10 @@ MotionLab Interactive is a separate post-Core development line intended to turn 
 
 | Milestone | Scope | Exit condition | Status |
 |---|---|---|---|
-| I0 | Architecture & local data organization | ADR accepted, workspace policy defined, private inventory completed, Core boundary preserved | In progress |
-| I1 | Session model / SQLite | Session lifecycle and schema implemented/tested locally | Not started |
-| I2 | Measurement model | Knee reuse plus verified shank-foot and trunk definitions with synthetic tests | Not started |
-| I3 | Local API | Stable local service contract exposes session, analysis, review and result operations | Not started |
+| I0 | Architecture & local data organization | ADR accepted, workspace policy defined, private inventory completed, Core boundary preserved | Complete |
+| I1 | Session model / SQLite | Session lifecycle and schema implemented/tested locally | Complete |
+| I2 | Measurement model | Knee reuse plus verified shank-foot and trunk definitions with synthetic tests | Complete |
+| I3 | Local API | Stable local service contract exposes session, analysis, review and result operations | In progress |
 | I4 | NPL workspace UI | Import/run/review shell, player and tokenized NPL-oriented design system | Not started |
 | I5 | Interactive landmark review | Drag correction, audit history, undo/reset and dependency-aware recalculation | Not started |
 | I6 | Results workspace | Synchronized numbers, graphs and frame table | Not started |
