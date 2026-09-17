@@ -58,15 +58,20 @@ and writes a CSV, figure, deterministic recording-maximum summary and provenance
 JSON. The full suite passes with `73 passed`.
 See [M6 reproduction and output contract](docs/m6_angle_pipeline.md).
 
+**M7: Small Controlled Squat Dataset** is complete locally. Five independent,
+operator-confirmed one-squat recordings were processed sequentially with the
+frozen M6 pipeline, right side, and event rule. Source mapping and results remain
+private; all five runs record clean committed-code provenance, and the full
+suite passed with `73 passed`. M8 has not started.
+See [M7 acquisition and processing evidence](docs/m7_controlled_squat_dataset.md).
+
 See the [M5 integration audit](docs/m5_sports2d_integration.md) and the
 [Simplified Core roadmap](docs/roadmap.md).
 
 ## Core completion path
 
-1. freeze the selected M6 recording-maximum rule and side for M7;
-2. collect and process five controlled one-squat video trials;
-3. report simple descriptive results, failures, configuration, and limitations;
-4. publish a concise technical conclusion and reproducible release.
+1. report simple descriptive results, failures, configuration, and limitations;
+2. publish a concise technical conclusion and reproducible release.
 
 No second pose engine, manual reference, full uncertainty budget, Monte Carlo
 study, robustness matrix, or generalized camera calibration is required to
