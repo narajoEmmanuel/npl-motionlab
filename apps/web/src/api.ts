@@ -7,6 +7,16 @@ import type {
 
 const API_ROOT = "/api/v1";
 
+interface AnalysisImportResponse {
+  session_id: string;
+  status: string;
+  imported: {
+    frames: number;
+    automatic_landmarks: number;
+    measurement_results: number;
+  };
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_ROOT}${path}`, {
     ...init,
@@ -53,7 +63,7 @@ export const motionlabApi = {
     sessionId: string,
     payload: { trc_path: string; engine_provenance_path: string },
   ) =>
-    request<SessionSnapshot>(`/sessions/${sessionId}/analysis/import`, {
+    request<AnalysisImportResponse>(`/sessions/${sessionId}/analysis/import`, {
       method: "POST",
       body: JSON.stringify(payload),
     }),
