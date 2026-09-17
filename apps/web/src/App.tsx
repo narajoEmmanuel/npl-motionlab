@@ -234,7 +234,7 @@ function App() {
               </div>
               <label className="file-button">
                 Attach local preview
-                <input type="file" accept="video/*" onChange={attachPreview} />
+                <input type="file" aria-label="Attach local preview" accept="video/*" onChange={attachPreview} />
               </label>
             </div>
 
@@ -261,7 +261,7 @@ function App() {
                         return (
                           <g key={role} className={`landmark landmark-${point.source_state}`}>
                             <circle cx={point.x_px} cy={point.y_px} r="10" />
-                            <text x={point.x_px + 14} y={point.y_px - 14}>{role}</text>
+                            <text x={point.x_px + 14} y={point.y_px - 14} style={{ fontSize: session.video!.decoded_width_px / 64 }}>{role}</text>
                           </g>
                         );
                       })}

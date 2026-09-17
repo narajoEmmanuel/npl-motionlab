@@ -210,6 +210,7 @@ input:focus {
 .primary-button,
 .secondary-button,
 .file-button {
+  position: relative;
   border-radius: var(--ml-radius-sm);
   padding: 9px 12px;
   font-weight: 750;
@@ -305,7 +306,17 @@ input:focus {
 }
 
 .file-button input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  opacity: 0;
+}
+
+button:focus-visible,
+.file-button:focus-within {
+  outline: 2px solid var(--ml-accent);
+  outline-offset: 3px;
 }
 
 .video-canvas {
