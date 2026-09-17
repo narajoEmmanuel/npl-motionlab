@@ -18,6 +18,12 @@ interface AnalysisImportResponse {
   };
 }
 
+export interface ExportResponse {
+  session_id: string;
+  export_dir: string;
+  artifacts: Record<string, string>;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_ROOT}${path}`, {
     ...init,
@@ -72,6 +78,9 @@ export const motionlabApi = {
   getFrame: (sessionId: string, frameIndex: number) =>
     request<FrameSnapshot>(`/sessions/${sessionId}/frames/${frameIndex}`),
 
+  getFrames: (sessionId: string) =>
+    request<FrameSnapshot[]>(`/sessions/${sessionId}/frames`),
+
   correctLandmark: (
     sessionId: string,
     frameIndex: number,
@@ -97,4 +106,10 @@ export const motionlabApi = {
       `/sessions/${sessionId}/frames/${frameIndex}/landmarks/${role}/undo`,
       { method: "POST" },
     ),
+
+  exportSession: (sessionId: string, includeOverlayMp4 = true) =>
+    request<ExportResponse>(`/sessions/${sessionId}/exports`, {
+      method: "POST",
+      body: JSON.stringify({ include_overlay_mp4: includeOverlayMp4 }),
+    }),
 };
