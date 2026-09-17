@@ -44,6 +44,9 @@ A visible landmark handle can be dragged for the current frame only.
 - pointer release commits one correction for one frame/role;
 - `Esc` cancels an active unsaved drag;
 - reset deactivates the current correction and restores the automatic point;
+- frame/role-specific Undo restores the preceding correction, or automatic position
+  when the first correction is undone; Reset and Undo are disabled for automatic
+  or missing points;
 - frame navigation is disabled while a correction request is being saved;
 - the UI explicitly labels Automatic, Corrected and Missing states.
 
@@ -71,7 +74,42 @@ Only definitions affected by the edited role should be refreshed. Reviewed rows 
 
 Correction rows are historical evidence rather than mutable replacements. I5 review services support restoring the previous correction when undoing the latest active correction. Reset remains distinct: it returns the effective point to the automatic landmark.
 
-The API wiring for undo/review-cache persistence must preserve transaction boundaries: correction/reset/undo plus affected reviewed measurements should commit together or roll back together.
+The correction POST and reset DELETE routes persist affected reviewed values in
+the same database transaction as the landmark change. The undo route is:
+
+```text
+POST /api/v1/sessions/{session_id}/frames/{frame_index}/landmarks/{role}/undo
+```
+
+It calls the review service and persists affected reviewed values before returning
+an effective frame snapshot. All three operations commit together or roll back
+together. The additive review table uses a single transactional `execute`, avoiding
+the implicit commit performed by SQLite `executescript` during a pending edit.
+Automatic `measurement_results` are not updated by any review operation.
+
+## Local verification
+
+Typecheck and production build pass. The four frontend coordinate tests cover
+matching aspect ratios, wider/taller letterboxed containers, both image corners,
+original pixel units, outside-image rejection and zero-size rejection. Run them
+with `npm test` in `apps/web` using Node 22.18+ (native TypeScript stripping).
+
+Synthetic API tests cover all five dependency sets, frame-local writes, preserved
+automatic coordinates/results, reset recomputation, two-edit history, successive
+undo, invalid roles, and rollback after reviewed writes for correction/reset/undo.
+Review service tests: **5 passed**; API tests: **19 passed**; combined interactive
+layers: **52 passed**; full Python suite: **158 passed**.
+
+One retained private M7 source/analysis was imported through the UI and reviewed
+locally. Hip/Knee and all five role dependencies were verified, including persisted
+reviewed values, unchanged unrelated values, responsive segment preview, one save
+per release, successive undo and exact reset to automatic. Escape and letterbox
+release/click tests produced no correction. All verification edits were undone or
+reset; automatic database evidence remained unchanged. Desktop review at
+1440x900 and 1920x1080 found no horizontal overflow or clipped table cells.
+Private paths, coordinate values, screenshots and database contents are not
+published here. This is interaction/integration verification, not a claim that
+manual values are more accurate.
 
 ## Interpretation boundary
 

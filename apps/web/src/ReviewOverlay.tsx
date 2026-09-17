@@ -1,6 +1,7 @@
 import { PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import type { FrameSnapshot, LandmarkRole, VideoRecord } from "./types";
+import { pointerToImage } from "./pointerToImage";
 
 const LANDMARK_ORDER: LandmarkRole[] = ["shoulder", "hip", "knee", "ankle", "toe"];
 const SEGMENTS: Array<[LandmarkRole, LandmarkRole]> = [
@@ -24,34 +25,13 @@ interface DragState {
   pointerId: number;
 }
 
-function pointerToImage(
+function pointerFromOverlay(
   svg: SVGSVGElement,
   video: VideoRecord,
   clientX: number,
   clientY: number,
 ): { x: number; y: number } | null {
-  const rect = svg.getBoundingClientRect();
-  const scale = Math.min(
-    rect.width / video.decoded_width_px,
-    rect.height / video.decoded_height_px,
-  );
-  if (!Number.isFinite(scale) || scale <= 0) return null;
-
-  const renderedWidth = video.decoded_width_px * scale;
-  const renderedHeight = video.decoded_height_px * scale;
-  const offsetX = (rect.width - renderedWidth) / 2;
-  const offsetY = (rect.height - renderedHeight) / 2;
-  const localX = clientX - rect.left - offsetX;
-  const localY = clientY - rect.top - offsetY;
-
-  if (localX < 0 || localY < 0 || localX > renderedWidth || localY > renderedHeight) {
-    return null;
-  }
-
-  return {
-    x: Math.min(video.decoded_width_px, Math.max(0, localX / scale)),
-    y: Math.min(video.decoded_height_px, Math.max(0, localY / scale)),
-  };
+  return pointerToImage(svg.getBoundingClientRect(), video, clientX, clientY);
 }
 
 export function ReviewOverlay({ frame, video, disabled = false, onCommit }: ReviewOverlayProps) {
@@ -80,7 +60,7 @@ export function ReviewOverlay({ frame, video, disabled = false, onCommit }: Revi
 
   function beginDrag(event: PointerEvent<SVGCircleElement>, role: LandmarkRole) {
     if (disabled || saving || !svgRef.current) return;
-    const point = pointerToImage(svgRef.current, video, event.clientX, event.clientY);
+    const point = pointerFromOverlay(svgRef.current, video, event.clientX, event.clientY);
     if (!point) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     setDrag({ role, xPx: point.x, yPx: point.y, pointerId: event.pointerId });
@@ -89,18 +69,20 @@ export function ReviewOverlay({ frame, video, disabled = false, onCommit }: Revi
 
   function moveDrag(event: PointerEvent<SVGSVGElement>) {
     if (!drag || event.pointerId !== drag.pointerId || !svgRef.current) return;
-    const point = pointerToImage(svgRef.current, video, event.clientX, event.clientY);
+    const point = pointerFromOverlay(svgRef.current, video, event.clientX, event.clientY);
     if (!point) return;
     setDrag({ ...drag, xPx: point.x, yPx: point.y });
   }
 
   async function finishDrag(event: PointerEvent<SVGSVGElement>) {
     if (!drag || event.pointerId !== drag.pointerId) return;
+    const point = svgRef.current && pointerFromOverlay(svgRef.current, video, event.clientX, event.clientY);
     const pending = drag;
     setDrag(null);
+    if (!point) return;
     setSaving(true);
     try {
-      await onCommit(pending.role, pending.xPx, pending.yPx);
+      await onCommit(pending.role, point.x, point.y);
     } finally {
       setSaving(false);
     }
@@ -145,7 +127,7 @@ export function ReviewOverlay({ frame, video, disabled = false, onCommit }: Revi
             <circle
               cx={point.x_px}
               cy={point.y_px}
-              r="12"
+              r={video.decoded_width_px / 128}
               className="landmark-handle"
               role="button"
               aria-label={`Move ${role} landmark`}
@@ -153,8 +135,8 @@ export function ReviewOverlay({ frame, video, disabled = false, onCommit }: Revi
               onPointerDown={(event) => beginDrag(event, role)}
             />
             <text
-              x={point.x_px + 16}
-              y={point.y_px - 16}
+              x={point.x_px + video.decoded_width_px / 128 + 14}
+              y={point.y_px - video.decoded_width_px / 128 - 14}
               style={{ fontSize: video.decoded_width_px / 64 }}
             >
               {role}

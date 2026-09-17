@@ -14,6 +14,8 @@ from motionlab.sessions.database import (
     store_automatic_landmark,
 )
 from motionlab.video_metadata import VideoMetadata
+from motionlab.review import recalculate_reviewed_measurements
+from motionlab.measurements import DEFINITIONS, evaluate_measurement
 
 
 SHA = "a" * 64
@@ -266,3 +268,130 @@ def test_analysis_import_rejects_wrong_source_identity(tmp_path):
     )
     assert response.status_code == 422
     assert "source_video_name" in response.json()["detail"]
+
+
+@pytest.fixture
+def review_session(tmp_path):
+    session_id = "session_" + "1" * 32
+    db = _create_db(tmp_path / "workspace", session_id)
+    points = {"shoulder": (0, -2), "hip": (0, 0), "knee": (0, 1),
+              "ankle": (0, 2), "toe": (1, 2)}
+    client = _client(tmp_path)
+    with SessionDatabase(db) as connection:
+        for frame_index in (0, 1):
+            for role, (x, y) in points.items():
+                store_automatic_landmark(connection, session_id=session_id,
+                                         frame_index=frame_index, role=role, x_px=x, y_px=y)
+            frame_id = connection.execute("SELECT id FROM frames WHERE frame_index=?", (frame_index,)).fetchone()["id"]
+            for name in DEFINITIONS:
+                measurement = evaluate_measurement(name, points)
+                connection.execute("""INSERT INTO measurement_results(
+                    frame_id, measurement_name, value_deg, valid, invalid_reason,
+                    source_state, definition_version, created_at_utc)
+                    VALUES (?, ?, ?, 1, NULL, 'automatic', '1', 'synthetic')""",
+                    (frame_id, name, measurement.value_deg))
+            for role in points:
+                recalculate_reviewed_measurements(connection, session_id=session_id,
+                                                   frame_index=frame_index, changed_role=role)
+    return client, db, f"/api/v1/sessions/{session_id}/frames/0/landmarks", points
+
+
+def _evidence(db):
+    with SessionDatabase(db) as connection:
+        return {table: [dict(row) for row in connection.execute(f"SELECT * FROM {table} ORDER BY id")]
+                for table in ("automatic_landmarks", "measurement_results", "manual_corrections", "reviewed_measurement_results")}
+
+
+@pytest.mark.parametrize("role,affected", [
+    ("shoulder", {"projected_trunk_inclination"}),
+    ("hip", {"projected_knee_flexion", "projected_trunk_inclination"}),
+    ("knee", {"projected_knee_flexion", "projected_shank_foot_angle"}),
+    ("ankle", {"projected_knee_flexion", "projected_shank_foot_angle"}),
+    ("toe", {"projected_shank_foot_angle"}),
+])
+def test_review_api_updates_only_dependent_rows_on_current_frame(review_session, role, affected):
+    client, db, url, points = review_session
+    before = _evidence(db)
+    x, y = points[role]
+    response = client.post(f"{url}/{role}/corrections", json={"x_px": x + 0.5, "y_px": y + 0.25})
+    assert response.status_code == 200
+    frame = response.json()
+    landmark = frame["landmarks"][role]
+    assert (landmark["x_px"], landmark["y_px"]) == (x + 0.5, y + 0.25)
+    assert (landmark["automatic_x_px"], landmark["automatic_y_px"]) == (x, y)
+    after = _evidence(db)
+    assert after["automatic_landmarks"] == before["automatic_landmarks"]
+    assert after["measurement_results"] == before["measurement_results"]
+    frame_id = before["automatic_landmarks"][0]["frame_id"]
+    for old, new in zip(before["reviewed_measurement_results"], after["reviewed_measurement_results"]):
+        if old["frame_id"] == frame_id and old["measurement_name"] in affected:
+            assert new["input_revision"] != old["input_revision"]
+            assert new["value_deg"] == pytest.approx(frame["measurements"][new["measurement_name"]]["value_deg"])
+        else:
+            assert new == old
+    reset = client.delete(f"{url}/{role}/correction")
+    assert reset.status_code == 200
+    assert (reset.json()["landmarks"][role]["x_px"], reset.json()["landmarks"][role]["y_px"]) == (x, y)
+    restored = _evidence(db)
+    assert restored["measurement_results"] == before["measurement_results"]
+    for old, new in zip(before["reviewed_measurement_results"], restored["reviewed_measurement_results"]):
+        if old["frame_id"] == frame_id and old["measurement_name"] in affected:
+            assert new["input_revision"] == "automatic"
+            assert new["value_deg"] == pytest.approx(old["value_deg"])
+        else:
+            assert new == old
+
+
+def test_review_api_history_undo_returns_previous_then_automatic(review_session):
+    client, db, url, _ = review_session
+    before = _evidence(db)
+    for x in (0.5, 1):
+        assert client.post(f"{url}/hip/corrections", json={"x_px": x, "y_px": 0}).status_code == 200
+    assert len(_evidence(db)["manual_corrections"]) == 2
+    for expected, state in ((0.5, "manual_corrected"), (0, "automatic")):
+        response = client.post(f"{url}/hip/undo")
+        assert response.status_code == 200
+        frame = response.json()
+        assert frame["landmarks"]["hip"]["x_px"] == expected
+        assert frame["landmarks"]["hip"]["source_state"] == state
+        assert frame["landmarks"]["hip"]["automatic_x_px"] == 0
+        evidence = _evidence(db)
+        for row in evidence["reviewed_measurement_results"][:3]:
+            assert row["value_deg"] == pytest.approx(frame["measurements"][row["measurement_name"]]["value_deg"])
+    assert evidence["automatic_landmarks"] == before["automatic_landmarks"]
+    assert evidence["measurement_results"] == before["measurement_results"]
+    assert evidence["reviewed_measurement_results"][3:] == before["reviewed_measurement_results"][3:]
+
+
+@pytest.mark.parametrize("operation", ["correction", "reset", "undo"])
+def test_review_api_rejects_invalid_role(review_session, operation):
+    client, db, url, _ = review_session
+    before = _evidence(db)
+    if operation == "correction":
+        response = client.post(f"{url}/invalid/corrections", json={"x_px": 1, "y_px": 1})
+    elif operation == "reset":
+        response = client.delete(f"{url}/invalid/correction")
+    else:
+        response = client.post(f"{url}/invalid/undo")
+    assert response.status_code == 422
+    assert _evidence(db) == before
+
+
+@pytest.mark.parametrize("operation", ["correction", "reset", "undo"])
+def test_review_api_rolls_back_correction_and_review_writes_together(review_session, monkeypatch, operation):
+    client, db, url, _ = review_session
+    if operation != "correction":
+        assert client.post(f"{url}/hip/corrections", json={"x_px": 1, "y_px": 0}).status_code == 200
+    before = _evidence(db)
+    def fail_after_writes(connection, **kwargs):
+        recalculate_reviewed_measurements(connection, **kwargs)
+        raise ValueError("synthetic failure after reviewed writes")
+    monkeypatch.setattr(importlib.import_module("motionlab.api.app"), "recalculate_reviewed_measurements", fail_after_writes)
+    if operation == "correction":
+        response = client.post(f"{url}/hip/corrections", json={"x_px": 2, "y_px": 0})
+    elif operation == "reset":
+        response = client.delete(f"{url}/hip/correction")
+    else:
+        response = client.post(f"{url}/hip/undo")
+    assert response.status_code == 422
+    assert _evidence(db) == before

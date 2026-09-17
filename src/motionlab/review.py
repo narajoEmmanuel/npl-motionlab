@@ -11,7 +11,7 @@ import sqlite3
 from datetime import datetime, timezone
 
 from motionlab.measurements import DEFINITIONS, definitions_for_landmark, evaluate_measurement
-from motionlab.sessions.database import get_effective_landmark
+from motionlab.sessions.database import LANDMARK_ROLES, get_effective_landmark
 
 REVIEW_SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS reviewed_measurement_results (
@@ -35,7 +35,8 @@ def _utc_now() -> str:
 
 def ensure_review_schema(connection: sqlite3.Connection) -> None:
     """Create additive post-I1 review storage without changing Core evidence."""
-    connection.executescript(REVIEW_SCHEMA_SQL)
+    # executescript implicitly commits pending changes, breaking atomic review.
+    connection.execute(REVIEW_SCHEMA_SQL)
 
 
 def _frame_id(connection: sqlite3.Connection, session_id: str, frame_index: int) -> int:
@@ -128,6 +129,8 @@ def undo_manual_correction(
     role: str,
 ) -> bool:
     """Undo the latest active correction, restoring the prior correction if any."""
+    if role not in LANDMARK_ROLES:
+        raise ValueError(f"role must be one of {sorted(LANDMARK_ROLES)}")
     frame_id = _frame_id(connection, session_id, frame_index)
     current = connection.execute(
         """

@@ -155,6 +155,21 @@ function App() {
     }
   }
 
+  async function undoLandmark(role: LandmarkRole) {
+    if (!session || !frame) return;
+    setReviewBusy(true);
+    setError(null);
+    try {
+      const reviewed = await motionlabApi.undoLandmark(session.id, frame.frame_index, role);
+      setFrame(reviewed);
+      setSession(await motionlabApi.getSession(session.id));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : `Unable to undo ${role}`);
+    } finally {
+      setReviewBusy(false);
+    }
+  }
+
   function attachPreview(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -334,14 +349,21 @@ function App() {
                       <span className={`source-state source-${point?.source_state ?? "missing"}`}>
                         {point?.source_state === "manual_corrected" ? "Corrected" : point ? "Automatic" : "Missing"}
                       </span>
-                      <span>
+                      <span className="review-actions">
                         <button
                           type="button"
                           className="table-action"
+                          aria-label={`Reset ${role} to automatic`}
                           disabled={!point || point.source_state !== "manual_corrected" || reviewBusy}
                           onClick={() => resetLandmark(role)}
                         >
                           Reset
+                        </button>
+                        <button type="button" className="table-action"
+                          aria-label={`Undo ${role} correction`}
+                          disabled={!point || point.source_state !== "manual_corrected" || reviewBusy}
+                          onClick={() => undoLandmark(role)}>
+                          Undo
                         </button>
                       </span>
                     </div>

@@ -28,8 +28,10 @@
 }
 
 .landmark-review-table .table-row {
-  grid-template-columns: minmax(70px, 1fr) 0.8fr 0.8fr 1fr minmax(62px, 0.75fr);
+  grid-template-columns: minmax(64px, 1fr) minmax(48px, 0.8fr) minmax(48px, 0.8fr) minmax(78px, 1fr) 112px;
 }
+
+.review-actions { display: flex; gap: 4px; }
 
 .table-action {
   min-height: 28px;

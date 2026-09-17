@@ -91,4 +91,10 @@ export const motionlabApi = {
       `/sessions/${sessionId}/frames/${frameIndex}/landmarks/${role}/correction`,
       { method: "DELETE" },
     ),
+
+  undoLandmark: (sessionId: string, frameIndex: number, role: LandmarkRole) =>
+    request<FrameSnapshot>(
+      `/sessions/${sessionId}/frames/${frameIndex}/landmarks/${role}/undo`,
+      { method: "POST" },
+    ),
 };
