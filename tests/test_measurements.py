@@ -5,6 +5,7 @@ import pytest
 
 from motionlab.measurements import (
     DEFINITIONS,
+    definitions_for_landmark,
     evaluate_measurement,
     projected_knee_flexion_deg,
     projected_shank_foot_angle_deg,
@@ -44,6 +45,20 @@ def test_registry_dependencies_are_explicit():
     assert DEFINITIONS["projected_knee_flexion"].dependencies == ("hip", "knee", "ankle")
     assert DEFINITIONS["projected_shank_foot_angle"].dependencies == ("knee", "ankle", "toe")
     assert DEFINITIONS["projected_trunk_inclination"].dependencies == ("hip", "shoulder")
+
+
+def test_dependency_selection_matches_edit_graph():
+    assert {d.name for d in definitions_for_landmark("hip")} == {
+        "projected_knee_flexion",
+        "projected_trunk_inclination",
+    }
+    assert {d.name for d in definitions_for_landmark("knee")} == {
+        "projected_knee_flexion",
+        "projected_shank_foot_angle",
+    }
+    assert {d.name for d in definitions_for_landmark("toe")} == {
+        "projected_shank_foot_angle"
+    }
 
 
 def test_evaluate_measurement_reports_missing_landmark():
