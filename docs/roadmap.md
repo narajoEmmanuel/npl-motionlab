@@ -59,8 +59,8 @@ video-processing stack.
 | M3 | Mathematical verification | Known-angle geometry and edge cases verified | Complete |
 | M4 | Controlled camera and image baseline | Pixel conversion verified, one real acquisition characterized, M4-D supports centered framing under tested conditions | Complete under simplified scope |
 | M5 | Sports2D integration | Pinned engine/configuration produces traceable pixel landmarks that MotionLab can ingest | Complete |
-| M6 | End-to-end angle pipeline | One representative video runs from source metadata to MotionLab angle time series and summary without manual coordinate entry | Planned |
-| M7 | Small controlled squat dataset | Five independent one-squat video trials collected under the fixed baseline and processed reproducibly | Planned |
+| M6 | End-to-end angle pipeline | One representative video runs from source metadata to MotionLab angle time series and summary without manual coordinate entry | Complete locally |
+| M7 | Small controlled squat dataset | Five independent one-squat video trials collected under the fixed baseline and processed reproducibly | Complete locally |
 | M8 | Final Core analysis | Per-trial outputs and simple descriptive summaries generated with explicit limitations | Planned |
 | M9 | Technical conclusion and release | Short report, reproducible public artifacts, README and tagged release completed | Planned |
 
@@ -82,8 +82,8 @@ Observed integration evidence:
 - the full MotionLab test suite passed, `64 passed`.
 
 This is integration evidence, not pose-accuracy or biomechanical-validity
-evidence. M5 is complete. M6 has not started and must begin only after the M5
-feature branch is merged to `main`.
+evidence. M5 is complete and its feature branch is merged to `main`, satisfying
+the prerequisite for the subsequent M6 implementation.
 
 ## M4 closure decision
 
@@ -122,6 +122,15 @@ No second pose engine is required.
 
 ## M6 minimum deliverable
 
+The exit condition was demonstrated locally on 2026-09-16: the documented
+command reused the M5 TRC, preserved 597 rows (541 valid, 56 missing), generated
+CSV/figure/summary/provenance, and passed 73 tests.
+See [M6 evidence and reproduction](m6_angle_pipeline.md). The selected rule is
+maximum valid projected flexion across the recording, resolving exact ties by
+lowest engine frame. Multiple flexion episodes in the representative recording
+support a recording maximum, not automatic repetition segmentation. M7 used
+this frozen rule for five operator-confirmed one-squat recordings.
+
 One command or clearly documented sequence shall:
 
 1. inspect/hash the original video;
@@ -144,9 +153,11 @@ The purpose is not population inference and not clinical validation. The dataset
 exists only to demonstrate repeatable operation and describe observed variation
 under one bounded setup.
 
-The exact event-summary rule will be frozen in M6 before processing the five
-Core trials. It should be the simplest rule that remains stable on the
-representative video.
+M7 completed locally on 2026-09-16 with five sequential pinned-engine/frozen-M6
+runs, private source metadata and trial manifest, verified output provenance,
+and 73 passing tests. Side and event rule were frozen before processing.
+See [M7 acquisition, processing, and completion evidence](m7_controlled_squat_dataset.md).
+M8 has not started.
 
 ## M8 minimum analysis
 

@@ -13,7 +13,7 @@ Status values are **Defined**, **Verified**, **Deferred**, and **Optional**.
 | ID | Requirement | Verification | Target | Status |
 |---|---|---|---|---|
 | ML-SCP-001 | The Core system shall estimate one principal measurand: 2D projected sagittal-plane knee flexion angle. | Charter and design inspection | M1 | Verified |
-| ML-SCP-002 | The Core movement shall be a controlled bodyweight squat recorded with one standardized single-camera setup. | Protocol inspection | M7 | Defined |
+| ML-SCP-002 | The Core movement shall be a controlled bodyweight squat recorded with one standardized single-camera setup. | M7 protocol and operator confirmation | M7 | Verified |
 | ML-SCP-003 | Public outputs shall identify the measurand as projected and two-dimensional wherever omission could imply anatomical 3D kinematics. | Claims audit | M9 | Defined |
 | ML-SCP-004 | Clinical, diagnostic, injury-risk, rehabilitation, and professional-motion-capture-equivalence claims shall remain outside the Core. | Claims audit | M9 | Defined |
 
@@ -36,9 +36,9 @@ Status values are **Defined**, **Verified**, **Deferred**, and **Optional**.
 | ID | Requirement | Verification | Target | Status |
 |---|---|---|---|---|
 | ML-CAM-001 | Source-video records shall retain file identity, decoded image dimensions, and available camera/video metadata relevant to interpretation. | Metadata inspection | M4 onward | Verified |
-| ML-CAM-002 | The Core repeated-trial dataset shall use one fixed practical acquisition configuration and centered framing based on the bounded M4 evidence. | Protocol and dataset audit | M7 | Defined |
+| ML-CAM-002 | The Core repeated-trial dataset shall use one fixed practical acquisition configuration and centered framing based on the bounded M4 evidence. | M7 operator-confirmed setup; exact positioning not independently measured | M7 | Verified |
 | ML-DAT-001 | Original identifiable videos shall remain private by default and shall not be committed to the public repository. | Git/release audit | Ongoing | Verified |
-| ML-DAT-002 | Each derived result shall remain linkable to its source video identifier, engine/configuration version, and code revision. | Traceability audit | M6-M9 | Defined |
+| ML-DAT-002 | Each derived result shall remain linkable to its source video identifier, engine/configuration version, and code revision. | M6 provenance JSON with source/boundary/code hashes; retain for M7-M9 | M6-M9 | Verified |
 
 ## Sports2D integration
 
@@ -53,9 +53,9 @@ Status values are **Defined**, **Verified**, **Deferred**, and **Optional**.
 
 | ID | Requirement | Verification | Target | Status |
 |---|---|---|---|---|
-| ML-EXP-001 | One representative video shall demonstrate the complete source-to-angle workflow before the Core dataset is processed. | End-to-end run | M6 | Defined |
-| ML-EXP-002 | The Core dataset shall contain five independent one-squat video trials under the same fixed practical setup. | Dataset audit | M7 | Defined |
-| ML-EXP-003 | One predefined event-summary rule shall be frozen before processing the five Core trials. | Protocol/version inspection | M6-M7 | Defined |
+| ML-EXP-001 | One representative video shall demonstrate the complete source-to-angle workflow before the Core dataset is processed. | M6 documented local end-to-end run | M6 | Verified |
+| ML-EXP-002 | The Core dataset shall contain five independent one-squat video trials under the same fixed practical setup. | M7 private manifest, distinct source hashes, operator confirmation | M7 | Verified |
+| ML-EXP-003 | One predefined event-summary rule shall be frozen before processing the five Core trials. | M7 clean provenance and frozen M6 module hashes | M6-M7 | Verified |
 | ML-EXP-004 | Frame count shall not be represented as independent replicate count. | Analysis review | M8 | Defined |
 
 ## Core analysis and conclusion
