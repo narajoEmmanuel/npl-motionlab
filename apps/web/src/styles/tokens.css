@@ -1,0 +1,71 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #13212b;
+  background: #eef2f4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  /* Provisional engineering UI tokens. These are not asserted as official NPL brand values. */
+  --ml-bg: #eef2f4;
+  --ml-surface: #ffffff;
+  --ml-surface-subtle: #f7f9fa;
+  --ml-surface-dark: #10202a;
+  --ml-border: #d7e0e5;
+  --ml-border-strong: #afbec7;
+  --ml-text: #13212b;
+  --ml-text-muted: #61717b;
+  --ml-text-inverse: #f7fbfc;
+  --ml-accent: #087f8c;
+  --ml-accent-strong: #006772;
+  --ml-accent-soft: #dff2f4;
+  --ml-warning: #a15a00;
+  --ml-warning-soft: #fff1da;
+  --ml-danger: #a33a3a;
+  --ml-danger-soft: #fde8e8;
+  --ml-corrected: #6c4bb6;
+  --ml-corrected-soft: #eee8fb;
+  --ml-shadow: 0 1px 2px rgba(18, 33, 43, 0.06), 0 8px 24px rgba(18, 33, 43, 0.06);
+
+  --ml-radius-sm: 6px;
+  --ml-radius-md: 10px;
+  --ml-radius-lg: 14px;
+  --ml-space-1: 4px;
+  --ml-space-2: 8px;
+  --ml-space-3: 12px;
+  --ml-space-4: 16px;
+  --ml-space-5: 20px;
+  --ml-space-6: 24px;
+  --ml-space-8: 32px;
+
+  --ml-font-xs: 0.72rem;
+  --ml-font-sm: 0.82rem;
+  --ml-font-md: 0.95rem;
+  --ml-font-lg: 1.15rem;
+  --ml-font-xl: 1.45rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 1180px;
+  min-height: 100vh;
+  background: var(--ml-bg);
+  color: var(--ml-text);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
