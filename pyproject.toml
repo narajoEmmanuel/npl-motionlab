@@ -22,10 +22,15 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "httpx",
     "ipykernel",
     "jupyter",
     "pytest",
     "pytest-cov",
+]
+interactive = [
+    "fastapi",
+    "uvicorn",
 ]
 
 [tool.setuptools.packages.find]
