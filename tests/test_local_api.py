@@ -1,3 +1,4 @@
+import importlib
 import json
 from pathlib import Path
 
@@ -78,7 +79,8 @@ def test_health_and_measurement_definitions(tmp_path):
 def test_create_session_inspects_source_and_creates_private_db(tmp_path, monkeypatch):
     source = tmp_path / "source.mp4"
     source.write_bytes(b"not-real-video")
-    monkeypatch.setattr("motionlab.api.app.inspect_video", lambda path: _fake_metadata(source))
+    monkeypatch.setattr(importlib.import_module("motionlab.api.app"),
+                        "inspect_video", lambda path: _fake_metadata(source))
     client = _client(tmp_path)
 
     response = client.post(
