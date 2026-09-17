@@ -61,7 +61,7 @@ video-processing stack.
 | M5 | Sports2D integration | Pinned engine/configuration produces traceable pixel landmarks that MotionLab can ingest | Complete |
 | M6 | End-to-end angle pipeline | One representative video runs from source metadata to MotionLab angle time series and summary without manual coordinate entry | Complete locally |
 | M7 | Small controlled squat dataset | Five independent one-squat video trials collected under the fixed baseline and processed reproducibly | Complete locally |
-| M8 | Final Core analysis | Per-trial outputs and simple descriptive summaries generated with explicit limitations | Planned |
+| M8 | Final Core analysis | Per-trial outputs and simple descriptive summaries generated with explicit limitations | Complete locally |
 | M9 | Technical conclusion and release | Short report, reproducible public artifacts, README and tagged release completed | Planned |
 
 Milestones after M4 are intentionally small. New work must demonstrate that it
@@ -157,9 +157,16 @@ M7 completed locally on 2026-09-16 with five sequential pinned-engine/frozen-M6
 runs, private source metadata and trial manifest, verified output provenance,
 and 73 passing tests. Side and event rule were frozen before processing.
 See [M7 acquisition, processing, and completion evidence](m7_controlled_squat_dataset.md).
-M8 has not started.
+M8 consumed these completed artifacts without rerunning processing.
 
 ## M8 minimum analysis
+
+M8 completed locally on 2026-09-16: five validated private event summaries,
+mean/sample SD (`ddof=1`)/extrema/range, failure and missingness accounting, and
+two inspected figures. The real run recorded clean committed-code provenance;
+the full suite passed with 86 tests. See
+[M8 evidence and bounded interpretation](m8_final_core_analysis.md).
+M9 has not started.
 
 Keep the analysis descriptive. At minimum report:
 
