@@ -1,0 +1,110 @@
+.results-workspace {
+  display: grid;
+  gap: 14px;
+}
+
+.results-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.results-summary {
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
+  padding: 10px 12px;
+  display: grid;
+  gap: 3px;
+}
+
+.results-summary span,
+.results-summary small,
+.chart-title {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.results-summary strong {
+  font-size: 15px;
+}
+
+.chart-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.result-chart {
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
+  padding: 8px;
+}
+
+.result-chart svg {
+  display: block;
+  width: 100%;
+  height: 92px;
+  overflow: visible;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-cursor {
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.results-table-wrap {
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.results-table th,
+.results-table td {
+  padding: 7px 9px;
+  text-align: right;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.results-table th:first-child,
+.results-table td:first-child {
+  text-align: left;
+}
+
+.results-table thead {
+  position: sticky;
+  top: 0;
+  background: var(--surface-raised);
+  z-index: 1;
+}
+
+.results-table tbody tr {
+  cursor: pointer;
+}
+
+.results-table tbody tr:hover,
+.results-table tbody tr:focus,
+.results-table tbody tr.active {
+  background: var(--surface-selected);
+  outline: none;
+}
+
+@media (max-width: 1100px) {
+  .results-summary-row {
+    grid-template-columns: 1fr;
+  }
+}
