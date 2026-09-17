@@ -18,9 +18,48 @@ ankle
 toe
 ```
 
-The exact pinned Sports2D `Body_with_feet` column names for `shoulder` and `toe`
-must be verified against the installed/local output before the adapter mapping is
-extended. I2 must not guess those external names.
+## Verified pinned-engine mapping
+
+On 2026-09-17, the marker header of a retained private M7 pixel TRC was inspected
+directly, without reading its coordinate rows. Its adjacent engine provenance
+confirms Sports2D **0.8.34**, Pose2Sim **0.10.49**, model **Body_with_feet**.
+Only external marker names are published here; human coordinates are not fixtures.
+
+| MotionLab semantic role | Right external marker | Left external marker |
+|---|---|---|
+| shoulder | `RShoulder` | `LShoulder` |
+| hip | `RHip` | `LHip` |
+| knee | `RKnee` | `LKnee` |
+| ankle | `RAnkle` | `LAnkle` |
+| toe | `RBigToe` | `LBigToe` |
+
+All foot candidates present in that header are `RBigToe`, `RSmallToe`, `RHeel`,
+`LBigToe`, `LSmallToe`, and `LHeel`.
+
+The first shank-foot definition selects **BigToe**, a named anterior toe endpoint,
+to define a reproducible Ankle->Toe ray. SmallToe is another anterior candidate;
+the header alone does not establish which point is more accurate. Heel is a
+posterior endpoint. This choice specifies geometry, not clinical dorsiflexion or
+an anatomical foot-axis validation. No averaging or fallback to other foot markers
+is performed. Changing the toe endpoint later requires an explicit definition/
+mapping decision because it changes the measured ray.
+
+`SPORTS2D_BODY_WITH_FEET_INTERACTIVE_LANDMARKS` contains the five-role mapping.
+`semantic_landmarks_from_sports2d` maps external pixel columns into semantic
+columns, preserving frame order, engine time, pixel values and missing coordinates.
+Absent required columns raise an explicit error; row-level NaN coordinates remain
+NaN so the registry reports `missing_landmark`.
+
+The existing `SPORTS2D_BODY_WITH_FEET_LANDMARKS` deliberately retains only hip,
+knee and ankle. The frozen knee pipeline serializes that mapping in provenance,
+and retained Core readers require the original three-role contract. Keeping the
+interactive mapping separate preserves Core output columns, calculations and
+provenance compatibility. Knee-only TRCs do not need shoulder or toe columns.
+
+Adding the interactive adapter changes the module's byte hash. Historical Core
+provenance is not rewritten, and its strict frozen-module validator is not relaxed.
+Reproduce frozen M7/M8 evidence at its recorded Core revision; the I2 checkout
+preserves knee behavior but is not byte-identical to that historical adapter.
 
 ## Versioned definitions
 
@@ -123,11 +162,12 @@ Implemented in I2:
 - explicit validity evaluation;
 - synthetic verification.
 
-Still pending local verification before I2 can close:
+Local verification completed:
 
-- exact right/left shoulder external marker names in pinned Sports2D output;
-- exact right/left toe/forefoot external marker names in pinned Sports2D output;
-- adapter mapping tests using those verified names.
+- exact right/left shoulder and toe/forefoot names read from the retained header;
+- explicit BigToe endpoint choice with all foot candidates recorded above;
+- synthetic adapter tests for both sides, unchanged Core mapping, original pixels,
+  frame order, missing columns and missing coordinates.
 
 Not part of I2:
 
