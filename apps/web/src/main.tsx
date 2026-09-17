@@ -6,6 +6,7 @@ import "./styles/tokens.css";
 import "./styles/app.css";
 import "./styles/review.css";
 import "./styles/results.css";
+import "./styles/completion.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
