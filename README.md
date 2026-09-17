@@ -11,6 +11,24 @@ matter for engineering traceability: source provenance, verified angle geometry,
 landmark adaptation, controlled acquisition, repeatable processing, and bounded
 interpretation.
 
+## Interactive v0.2 release candidate
+
+Interactive v0.2 adds local sessions, auditable five-landmark review, synchronized
+knee/shank-foot/trunk results, and CSV/JSON/PNG/reviewed-MP4 exports. Core v0.1.0
+remains the frozen measurement baseline. The local verification gate is complete;
+merge, tag and release remain pending review.
+
+Start the final backend from the repository root:
+
+```powershell
+python -m uvicorn motionlab.api.server:app --host 127.0.0.1 --port 8000
+```
+
+In a second terminal, run `npm run dev` from `apps/web`, then open
+`http://127.0.0.1:5173`. See the [install and local run guide](docs/v0.2_local_run.md),
+[completion evidence](docs/v0.2_completion.md), and
+[release-candidate notes](docs/v0.2_release_notes.md).
+
 ## Current scope
 
 The Core workflow is:

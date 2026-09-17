@@ -8,11 +8,13 @@ from __future__ import annotations
 
 import csv
 import json
+import tempfile
 from pathlib import Path
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.figure import Figure
 
 from motionlab.measurements import DEFINITIONS, evaluate_measurement
 from motionlab.sessions.database import get_effective_landmark
@@ -78,7 +80,7 @@ def _effective_frame(connection, session_id: str, frame_index: int):
     return landmarks, states, automatic, measurements
 
 
-def export_session_bundle(
+def _write_session_bundle(
     connection,
     *,
     session_id: str,
@@ -195,14 +197,15 @@ def export_session_bundle(
     }
     session_json.write_text(json.dumps(session_payload, indent=2) + "\n", encoding="utf-8")
 
-    fig, ax = plt.subplots(figsize=(10, 4.8))
+    fig = Figure(figsize=(10, 4.8))
+    FigureCanvasAgg(fig)
+    ax = fig.subplots()
     for name, definition in DEFINITIONS.items():
         x, y = [], []
         for row in json_frames:
             payload = row["measurements"][name]
-            if payload["valid"] and payload["value_deg"] is not None:
-                x.append(row["frame_index"])
-                y.append(payload["value_deg"])
+            x.append(row["frame_index"])
+            y.append(payload["value_deg"] if payload["valid"] else np.nan)
         if x:
             ax.plot(x, y, label=definition.display_name)
     ax.set_xlabel("Frame")
@@ -212,7 +215,7 @@ def export_session_bundle(
     ax.grid(True, alpha=0.25)
     fig.tight_layout()
     fig.savefig(figure_png, dpi=160)
-    plt.close(fig)
+    fig.clear()
 
     outputs = {
         "measurements_csv": measurements_csv,
@@ -231,10 +234,19 @@ def export_session_bundle(
             raise ValueError("unable to open source video for overlay export")
         fps = float(video["fps"])
         size = (int(video["decoded_width_px"]), int(video["decoded_height_px"]))
+        if any(dimension % 2 for dimension in size):
+            capture.release()
+            raise ValueError("MP4 export requires even source dimensions; refusing to crop")
+        if len(json_frames) != int(video["frame_count"]) or any(row["frame_index"] != index for index, row in enumerate(json_frames)):
+            capture.release()
+            raise ValueError("session frames differ from source frame contract")
         writer = cv2.VideoWriter(str(overlay_mp4), cv2.VideoWriter_fourcc(*"mp4v"), fps, size)
         if not writer.isOpened():
             capture.release()
+            writer.release()
             raise ValueError("unable to create MP4 overlay")
+        scale = max(1.0, min(size[0] / 1280, size[1] / 720))
+        thickness = max(1, round(2 * scale))
         try:
             count = 0
             while count < len(json_frames):
@@ -253,7 +265,7 @@ def export_session_bundle(
                             (round(a["x_px"]), round(a["y_px"])),
                             (round(b["x_px"]), round(b["y_px"])),
                             (0, 220, 255),
-                            2,
+                            thickness,
                             cv2.LINE_AA,
                         )
                 for role in SEMANTIC_ROLES:
@@ -261,21 +273,60 @@ def export_session_bundle(
                     if not point:
                         continue
                     p = (round(point["x_px"]), round(point["y_px"]))
-                    cv2.circle(frame, p, 6, (0, 255, 0), -1, cv2.LINE_AA)
-                    cv2.putText(frame, role, (p[0] + 8, p[1] - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+                    cv2.circle(frame, p, round(6 * scale), (0, 255, 0), -1, cv2.LINE_AA)
+                    cv2.putText(frame, role, (p[0] + round(8 * scale), p[1] - round(8 * scale)), cv2.FONT_HERSHEY_SIMPLEX, 0.5 * scale, (0, 255, 0), thickness, cv2.LINE_AA)
                 lines = []
                 for name in ("projected_knee_flexion", "projected_shank_foot_angle", "projected_trunk_inclination"):
                     payload = row["measurements"][name]
                     label = DEFINITIONS[name].display_name.replace("2D projected ", "")
                     lines.append(f"{label}: {payload['value_deg']:.1f} deg" if payload["valid"] and payload["value_deg"] is not None else f"{label}: invalid")
-                cv2.rectangle(frame, (0, 0), (520, 105), (0, 0, 0), -1)
+                cv2.rectangle(frame, (0, 0), (round(520 * scale), round(105 * scale)), (0, 0, 0), -1)
                 for index, text in enumerate(lines):
-                    cv2.putText(frame, text, (12, 28 + index * 30), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 1, cv2.LINE_AA)
+                    cv2.putText(frame, text, (round(12 * scale), round((28 + index * 30) * scale)), cv2.FONT_HERSHEY_SIMPLEX, 0.65 * scale, (255, 255, 255), thickness, cv2.LINE_AA)
                 writer.write(frame)
                 count += 1
+            if capture.read()[0]:
+                raise ValueError("source contains more frames than session metadata")
         finally:
             capture.release()
             writer.release()
         outputs["overlay_mp4"] = overlay_mp4
 
+        decoded_output = cv2.VideoCapture(str(overlay_mp4))
+        try:
+            count = 0
+            while True:
+                ok, frame = decoded_output.read()
+                if not ok:
+                    break
+                if (frame.shape[1], frame.shape[0]) != size:
+                    raise ValueError("encoded overlay dimensions differ from source")
+                count += 1
+            if count != len(json_frames):
+                raise ValueError("encoded overlay frame count differs from source")
+        finally:
+            decoded_output.release()
+
     return outputs
+
+
+def export_session_bundle(
+    connection,
+    *,
+    session_id: str,
+    output_dir: str | Path,
+    include_overlay_mp4: bool = True,
+) -> dict[str, Path]:
+    """Publish a complete bundle atomically; failed exports leave no partial files."""
+    output = Path(output_dir)
+    if output.exists():
+        raise FileExistsError("export output already exists; choose a new output directory")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".export-", dir=output.parent) as temporary:
+        staging = Path(temporary) / "bundle"
+        outputs = _write_session_bundle(
+            connection, session_id=session_id, output_dir=staging,
+            include_overlay_mp4=include_overlay_mp4,
+        )
+        staging.rename(output)
+        return {name: output / path.name for name, path in outputs.items()}

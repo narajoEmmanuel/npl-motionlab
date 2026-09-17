@@ -1,6 +1,10 @@
 import json
 from pathlib import Path
 
+import cv2
+import numpy as np
+import pytest
+
 from motionlab.session_export import export_session_bundle
 from motionlab.sessions.database import (
     SessionDatabase,
@@ -109,3 +113,53 @@ def test_export_refuses_overwrite(tmp_path):
             pass
         else:
             raise AssertionError("second export must refuse overwrite")
+
+
+def test_failed_overlay_leaves_no_partial_bundle(tmp_path):
+    db_path, session_id = _build_session(tmp_path)
+    output = tmp_path / "failed"
+    with SessionDatabase(db_path) as connection:
+        with pytest.raises(FileNotFoundError):
+            export_session_bundle(connection, session_id=session_id, output_dir=output)
+    assert not output.exists()
+    assert not list(tmp_path.glob(".export-*"))
+
+
+def test_overlay_preserves_decoded_dimensions_and_frames(tmp_path):
+    db_path, session_id = _build_session(tmp_path)
+    writer = cv2.VideoWriter(str(tmp_path / "source.mp4"), cv2.VideoWriter_fourcc(*"mp4v"), 30, (640, 480))
+    assert writer.isOpened()
+    for _ in range(2):
+        writer.write(np.zeros((480, 640, 3), dtype=np.uint8))
+    writer.release()
+    with SessionDatabase(db_path) as connection:
+        outputs = export_session_bundle(connection, session_id=session_id, output_dir=tmp_path / "complete")
+    capture = cv2.VideoCapture(str(outputs["overlay_mp4"]))
+    frames = []
+    try:
+        while True:
+            ok, frame = capture.read()
+            if not ok:
+                break
+            frames.append(frame)
+    finally:
+        capture.release()
+    assert len(frames) == 2
+    assert all(frame.shape == (480, 640, 3) for frame in frames)
+    assert frames[0][:105].max() > 100
+
+
+@pytest.mark.parametrize("source_frames", [1, 3])
+def test_source_frame_mismatch_does_not_publish_partial_export(tmp_path, source_frames):
+    db_path, session_id = _build_session(tmp_path)
+    writer = cv2.VideoWriter(str(tmp_path / "source.mp4"), cv2.VideoWriter_fourcc(*"mp4v"), 30, (640, 480))
+    assert writer.isOpened()
+    for _ in range(source_frames):
+        writer.write(np.zeros((480, 640, 3), dtype=np.uint8))
+    writer.release()
+    output = tmp_path / "mismatch"
+    with SessionDatabase(db_path) as connection:
+        with pytest.raises(ValueError, match="source"):
+            export_session_bundle(connection, session_id=session_id, output_dir=output)
+    assert not output.exists()
+    assert not list(tmp_path.glob(".export-*"))

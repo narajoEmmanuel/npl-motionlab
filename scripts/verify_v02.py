@@ -6,6 +6,7 @@ local verification gate documented in docs/v0.2_completion.md.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -16,7 +17,9 @@ WEB = ROOT / "apps" / "web"
 
 
 def run(command: list[str], *, cwd: Path = ROOT) -> None:
-    print("+", " ".join(command))
+    if command[0] == "npm":
+        command[0] = shutil.which("npm") or "npm"
+    print("+", " ".join(command), flush=True)
     subprocess.run(command, cwd=cwd, check=True)
 
 

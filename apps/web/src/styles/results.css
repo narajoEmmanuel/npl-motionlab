@@ -10,8 +10,8 @@
 }
 
 .results-summary {
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-raised);
+  border: 1px solid var(--ml-border);
+  background: var(--ml-surface-subtle);
   padding: 10px 12px;
   display: grid;
   gap: 3px;
@@ -20,7 +20,7 @@
 .results-summary span,
 .results-summary small,
 .chart-title {
-  color: var(--text-muted);
+  color: var(--ml-text-muted);
   font-size: 12px;
 }
 
@@ -34,8 +34,8 @@
 }
 
 .result-chart {
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-raised);
+  border: 1px solid var(--ml-border);
+  background: var(--ml-surface-subtle);
   padding: 8px;
 }
 
@@ -48,13 +48,13 @@
 
 .chart-line {
   fill: none;
-  stroke: var(--accent);
+  stroke: var(--ml-accent);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
 }
 
 .chart-cursor {
-  stroke: var(--text-muted);
+  stroke: var(--ml-text-muted);
   stroke-width: 1;
   stroke-dasharray: 4 4;
   vector-effect: non-scaling-stroke;
@@ -63,7 +63,7 @@
 .results-table-wrap {
   max-height: 260px;
   overflow: auto;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--ml-border);
 }
 
 .results-table {
@@ -76,7 +76,7 @@
 .results-table td {
   padding: 7px 9px;
   text-align: right;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--ml-border);
   white-space: nowrap;
 }
 
@@ -88,7 +88,7 @@
 .results-table thead {
   position: sticky;
   top: 0;
-  background: var(--surface-raised);
+  background: var(--ml-surface-subtle);
   z-index: 1;
 }
 
@@ -99,7 +99,7 @@
 .results-table tbody tr:hover,
 .results-table tbody tr:focus,
 .results-table tbody tr.active {
-  background: var(--surface-selected);
+  background: var(--ml-accent-soft);
   outline: none;
 }
 
@@ -108,3 +108,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+.lower-grid { align-items: start; }
+@media (max-width: 1600px) {
+  .lower-grid { grid-template-columns: minmax(0, 1fr); }
+}
+.results-table tbody tr:focus-visible { outline: 2px solid var(--ml-accent); outline-offset: -2px; }

@@ -16,10 +16,10 @@ MotionLab Interactive is a separate post-Core development line intended to turn 
 | I3 | Local API | Stable local service contract exposes session, analysis, review and result operations | Complete |
 | I4 | NPL workspace UI | Import/run/review shell, player and tokenized NPL-oriented design system | Complete |
 | I5 | Interactive landmark review | Drag correction, audit history, undo/reset and dependency-aware recalculation | Complete |
-| I6 | Results workspace | Synchronized numbers, graphs and frame table | Not started |
-| I7 | Render / export | Session-linked CSV/JSON/figure/MP4 exports | Not started |
-| I8 | Verification | Synthetic coverage plus one private end-to-end reviewed session | Not started |
-| I9 | v0.2 release | Documentation, clean public boundary, tests and tagged release | Not started |
+| I6 | Results workspace | Synchronized numbers, graphs and frame table | Complete |
+| I7 | Render / export | Session-linked CSV/JSON/figure/MP4 exports | Complete |
+| I8 | Verification | Synthetic coverage plus one private end-to-end reviewed session | Complete |
+| I9 | v0.2 release | Documentation, clean public boundary, tests and tagged release | Release candidate ready |
 
 ## I0: Architecture & local data organization
 
@@ -200,4 +200,6 @@ main
   -> next milestone branch
 ```
 
-Do not combine I0-I9 into one long-lived feature branch.
+The final v0.2 completion pass intentionally combines I5-I9 on
+`feature/i5-interactive-landmark-review`. I4-I8 verification is complete; I9
+is release-candidate ready. Merge, tag and release remain pending explicit review.

@@ -16,7 +16,7 @@ package extra. The frozen Core dependencies remain unchanged.
 Run the service on loopback only:
 
 ```powershell
-python -m uvicorn motionlab.api.app:app --host 127.0.0.1 --port 8000
+python -m uvicorn motionlab.api.server:app --host 127.0.0.1 --port 8000
 ```
 
 The API should not be exposed to a public network in this milestone.
@@ -188,3 +188,6 @@ I3 does not yet implement:
 - exports.
 
 Those are handled in later interactive milestones.
+
+For the final v0.2 workflow, this composed server includes the established I3
+API plus bulk results and export routes. See [local run guide](v0.2_local_run.md).

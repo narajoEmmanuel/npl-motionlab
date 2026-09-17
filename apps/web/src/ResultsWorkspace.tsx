@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { motionlabApi } from "./api";
+import { linePoints } from "./resultsChart";
 import type { FrameSnapshot, SessionSnapshot } from "./types";
 
 const SERIES = [
@@ -13,27 +14,6 @@ interface Props {
   session: SessionSnapshot | null;
   currentFrame: number;
   onSelectFrame: (frameIndex: number) => void;
-}
-
-function linePoints(rows: FrameSnapshot[], key: string, width: number, height: number) {
-  const values = rows
-    .map((row) => row.measurements[key])
-    .filter((value) => value?.valid && value.value_deg !== null)
-    .map((value) => value!.value_deg as number);
-  if (!values.length || rows.length < 2) return "";
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = Math.max(1e-9, max - min);
-  return rows
-    .map((row, index) => {
-      const measurement = row.measurements[key];
-      if (!measurement?.valid || measurement.value_deg === null) return null;
-      const x = (index / Math.max(1, rows.length - 1)) * width;
-      const y = height - ((measurement.value_deg - min) / span) * height;
-      return `${x.toFixed(2)},${y.toFixed(2)}`;
-    })
-    .filter(Boolean)
-    .join(" ");
 }
 
 export default function ResultsWorkspace({ session, currentFrame, onSelectFrame }: Props) {
@@ -62,7 +42,7 @@ export default function ResultsWorkspace({ session, currentFrame, onSelectFrame 
     return () => {
       cancelled = true;
     };
-  }, [session?.id, session?.status, session?.counts.frames, session?.counts.active_manual_corrections]);
+  }, [session]);
 
   const summaries = useMemo(() => {
     return Object.fromEntries(
@@ -118,7 +98,7 @@ export default function ResultsWorkspace({ session, currentFrame, onSelectFrame 
               <div className="chart-title">{label}</div>
               <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${label} angle by frame`}>
                 <line x1={cursorX} x2={cursorX} y1="0" y2={height} className="chart-cursor" />
-                {points && <polyline points={points} className="chart-line" />}
+                {points && <path d={points} className="chart-line" />}
               </svg>
             </div>
           );
@@ -140,14 +120,17 @@ export default function ResultsWorkspace({ session, currentFrame, onSelectFrame 
                   onClick={() => onSelectFrame(row.frame_index)}
                   tabIndex={0}
                   onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") onSelectFrame(row.frame_index);
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onSelectFrame(row.frame_index);
+                    }
                   }}
                 >
                   <td>{row.frame_index}</td>
                   <td>{row.time_s.toFixed(3)}</td>
                   {SERIES.map(([key]) => {
                     const value = row.measurements[key];
-                    return <td key={key}>{value?.valid && value.value_deg !== null ? value.value_deg.toFixed(1) : "—"}</td>;
+                    return <td key={key}>{value?.valid && value.value_deg !== null ? value.value_deg.toFixed(1) : "Invalid"}</td>;
                   })}
                   <td>{edited ? "Yes" : "No"}</td>
                 </tr>

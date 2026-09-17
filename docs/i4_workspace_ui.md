@@ -19,7 +19,7 @@ with React + TypeScript + Vite.
 Run the Python API on loopback:
 
 ```powershell
-python -m uvicorn motionlab.api.app:app --host 127.0.0.1 --port 8000
+python -m uvicorn motionlab.api.server:app --host 127.0.0.1 --port 8000
 ```
 
 Run the web workspace separately:
@@ -177,3 +177,6 @@ Before I4 is merged:
 - a verified synthetic analysis can be imported;
 - current-frame landmarks and all three measurements render;
 - private human media/workspace files remain untracked.
+
+For the final v0.2 workflow, this composed server includes the established I3
+API plus bulk results and export routes. See [local run guide](v0.2_local_run.md).
