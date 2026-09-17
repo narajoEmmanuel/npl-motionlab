@@ -22,6 +22,39 @@ SPORTS2D_BODY_WITH_FEET_LANDMARKS: dict[str, dict[str, str]] = {
     "left": {"hip": "LHip", "knee": "LKnee", "ankle": "LAnkle"},
 }
 
+# Keep the Core mapping above unchanged: M6 serializes it into provenance.
+# Names verified from retained pinned M7 pixel TRC headers (I2).
+SPORTS2D_BODY_WITH_FEET_INTERACTIVE_LANDMARKS: dict[str, dict[str, str]] = {
+    side: {"shoulder": f"{prefix}Shoulder", **SPORTS2D_BODY_WITH_FEET_LANDMARKS[side],
+           "toe": f"{prefix}BigToe"}
+    for side, prefix in (("right", "R"), ("left", "L"))
+}
+
+
+def semantic_landmarks_from_sports2d(
+    trc_data: pd.DataFrame, *, side: Side = "right",
+) -> pd.DataFrame:
+    """Map five interactive roles without changing pixel values or frame order.
+
+    Missing columns raise an explicit error. Missing row coordinates remain NaN
+    for the measurement registry to report as ``missing_landmark``. No fallback
+    from BigToe to SmallToe/Heel, interpolation or rescaling is performed.
+    """
+    side_key = side.lower()
+    if side_key not in SPORTS2D_BODY_WITH_FEET_INTERACTIVE_LANDMARKS:
+        raise ValueError("side must be 'right' or 'left'.")
+    mapping = SPORTS2D_BODY_WITH_FEET_INTERACTIVE_LANDMARKS[side_key]
+    columns = {"sports2d_frame": "sports2d_frame", "sports2d_time_s": "sports2d_time_s"}
+    for role, marker in mapping.items():
+        for axis in ("x", "y"):
+            columns[f"{marker}_{axis}_px"] = f"{role}_{axis}_px"
+    missing = [column for column in columns if column not in trc_data]
+    if missing:
+        raise ValueError("Sports2D TRC data is missing required columns: " + ", ".join(missing))
+    result = trc_data.loc[:, list(columns)].rename(columns=columns).copy()
+    result.insert(2, "side", side_key)
+    return result
+
 
 def _parse_float(value: str, *, field: str, allow_nan: bool) -> float:
     text = value.strip()
