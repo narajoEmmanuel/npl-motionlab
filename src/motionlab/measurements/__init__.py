@@ -7,6 +7,7 @@ from .definitions import (
     TRUNK_INCLINATION,
     MeasurementDefinition,
     MeasurementResult,
+    definitions_for_landmark,
     evaluate_measurement,
 )
 from .geometry import (
@@ -22,6 +23,7 @@ __all__ = [
     "TRUNK_INCLINATION",
     "MeasurementDefinition",
     "MeasurementResult",
+    "definitions_for_landmark",
     "evaluate_measurement",
     "projected_knee_flexion_deg",
     "projected_shank_foot_angle_deg",
