@@ -67,6 +67,16 @@ DEFINITIONS = {
 }
 
 
+def definitions_for_landmark(role: str) -> tuple[MeasurementDefinition, ...]:
+    """Return only measurements affected by one semantic landmark role."""
+
+    return tuple(
+        definition
+        for definition in DEFINITIONS.values()
+        if role in definition.dependencies
+    )
+
+
 def evaluate_measurement(
     definition_name: str,
     landmarks: Mapping[str, ArrayLike],
