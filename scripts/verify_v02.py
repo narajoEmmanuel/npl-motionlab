@@ -22,6 +22,7 @@ def run(command: list[str], *, cwd: Path = ROOT) -> None:
 
 def main() -> int:
     run([sys.executable, "-m", "pytest"])
+    run(["npm", "run", "test"], cwd=WEB)
     run(["npm", "run", "typecheck"], cwd=WEB)
     run(["npm", "run", "build"], cwd=WEB)
     print("Public v0.2 verification commands passed.")
