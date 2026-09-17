@@ -18,6 +18,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from motionlab.measurements import DEFINITIONS, evaluate_measurement
+from motionlab.review import recalculate_reviewed_measurements, undo_manual_correction
 from motionlab.sessions.database import (
     SessionDatabase,
     add_manual_correction,
@@ -446,6 +447,10 @@ def create_app(*, workspace_root: str | Path = "workspace") -> FastAPI:
                     y_px=request.y_px,
                     note=request.note,
                 )
+                recalculate_reviewed_measurements(
+                    connection, session_id=session_id, frame_index=frame_index,
+                    changed_role=role,
+                )
                 return _frame_snapshot(connection, session_id, frame_index)
         except Exception as exc:
             raise _http_error(exc) from exc
@@ -462,6 +467,27 @@ def create_app(*, workspace_root: str | Path = "workspace") -> FastAPI:
                     session_id=session_id,
                     frame_index=frame_index,
                     role=role,
+                )
+                recalculate_reviewed_measurements(
+                    connection, session_id=session_id, frame_index=frame_index,
+                    changed_role=role,
+                )
+                return _frame_snapshot(connection, session_id, frame_index)
+        except Exception as exc:
+            raise _http_error(exc) from exc
+
+    @app.post(
+        f"/api/{API_VERSION}/sessions/{{session_id}}/frames/{{frame_index}}/landmarks/{{role}}/undo"
+    )
+    def undo_correction(session_id: str, frame_index: int, role: str) -> dict[str, object]:
+        db_path = _require_db(context, session_id)
+        try:
+            with SessionDatabase(db_path) as connection:
+                undo_manual_correction(
+                    connection, session_id=session_id, frame_index=frame_index, role=role,
+                )
+                recalculate_reviewed_measurements(
+                    connection, session_id=session_id, frame_index=frame_index, changed_role=role,
                 )
                 return _frame_snapshot(connection, session_id, frame_index)
         except Exception as exc:

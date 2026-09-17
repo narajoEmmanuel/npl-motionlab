@@ -1,6 +1,9 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { motionlabApi } from "./api";
+import ExportPanel from "./ExportPanel";
+import { ReviewOverlay } from "./ReviewOverlay";
+import ResultsWorkspace from "./ResultsWorkspace";
 import type {
   FrameSnapshot,
   LandmarkRole,
@@ -9,12 +12,6 @@ import type {
 } from "./types";
 
 const LANDMARK_ORDER: LandmarkRole[] = ["shoulder", "hip", "knee", "ankle", "toe"];
-const SEGMENTS: Array<[LandmarkRole, LandmarkRole]> = [
-  ["shoulder", "hip"],
-  ["hip", "knee"],
-  ["knee", "ankle"],
-  ["ankle", "toe"],
-];
 
 function formatAngle(value: number | null, valid: boolean) {
   if (!valid || value === null) return "—";
@@ -33,6 +30,7 @@ function App() {
   const [frame, setFrame] = useState<FrameSnapshot | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [reviewBusy, setReviewBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -121,6 +119,59 @@ function App() {
     }
   }
 
+  async function correctLandmark(role: LandmarkRole, xPx: number, yPx: number) {
+    if (!session || !frame) return;
+    setReviewBusy(true);
+    setError(null);
+    try {
+      const reviewed = await motionlabApi.correctLandmark(
+        session.id,
+        frame.frame_index,
+        role,
+        { x_px: xPx, y_px: yPx, note: "interactive drag review" },
+      );
+      setFrame(reviewed);
+      const refreshed = await motionlabApi.getSession(session.id);
+      setSession(refreshed);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : `Unable to correct ${role}`);
+      throw reason;
+    } finally {
+      setReviewBusy(false);
+    }
+  }
+
+  async function resetLandmark(role: LandmarkRole) {
+    if (!session || !frame) return;
+    setReviewBusy(true);
+    setError(null);
+    try {
+      const reviewed = await motionlabApi.resetLandmark(session.id, frame.frame_index, role);
+      setFrame(reviewed);
+      const refreshed = await motionlabApi.getSession(session.id);
+      setSession(refreshed);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : `Unable to reset ${role}`);
+    } finally {
+      setReviewBusy(false);
+    }
+  }
+
+  async function undoLandmark(role: LandmarkRole) {
+    if (!session || !frame) return;
+    setReviewBusy(true);
+    setError(null);
+    try {
+      const reviewed = await motionlabApi.undoLandmark(session.id, frame.frame_index, role);
+      setFrame(reviewed);
+      setSession(await motionlabApi.getSession(session.id));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : `Unable to undo ${role}`);
+    } finally {
+      setReviewBusy(false);
+    }
+  }
+
   function attachPreview(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -143,7 +194,7 @@ function App() {
             <span className="status-dot" />
             API {apiStatus}
           </span>
-          <span className="phase-pill">Interactive v0.2 · I4</span>
+          <span className="phase-pill">Interactive v0.2 · completion</span>
         </div>
       </header>
 
@@ -243,29 +294,12 @@ function App() {
                 <div className="video-layer">
                   <video ref={videoRef} src={previewUrl} controls preload="metadata" />
                   {session?.video && frame && (
-                    <svg
-                      className="landmark-overlay"
-                      viewBox={`0 0 ${session.video.decoded_width_px} ${session.video.decoded_height_px}`}
-                      preserveAspectRatio="xMidYMid meet"
-                      aria-label="Landmark overlay"
-                    >
-                      {SEGMENTS.map(([a, b]) => {
-                        const pa = frame.landmarks[a];
-                        const pb = frame.landmarks[b];
-                        if (!pa || !pb) return null;
-                        return <line key={`${a}-${b}`} x1={pa.x_px} y1={pa.y_px} x2={pb.x_px} y2={pb.y_px} className="segment-line" />;
-                      })}
-                      {LANDMARK_ORDER.map((role) => {
-                        const point = frame.landmarks[role];
-                        if (!point) return null;
-                        return (
-                          <g key={role} className={`landmark landmark-${point.source_state}`}>
-                            <circle cx={point.x_px} cy={point.y_px} r="10" />
-                            <text x={point.x_px + 14} y={point.y_px - 14} style={{ fontSize: session.video!.decoded_width_px / 64 }}>{role}</text>
-                          </g>
-                        );
-                      })}
-                    </svg>
+                    <ReviewOverlay
+                      frame={frame}
+                      video={session.video}
+                      disabled={reviewBusy}
+                      onCommit={correctLandmark}
+                    />
                   )}
                 </div>
               ) : (
@@ -278,23 +312,23 @@ function App() {
             </div>
 
             <div className="timeline-strip">
-              <button onClick={() => loadFrame(frameIndex - 1)} disabled={!session || frameIndex <= 0}>←</button>
+              <button onClick={() => loadFrame(frameIndex - 1)} disabled={!session || frameIndex <= 0 || reviewBusy}>←</button>
               <input
                 aria-label="Frame"
                 type="range"
                 min="0"
                 max={maxFrame}
                 value={Math.min(frameIndex, maxFrame)}
-                disabled={!session}
+                disabled={!session || reviewBusy}
                 onChange={(event) => loadFrame(Number(event.target.value))}
               />
-              <button onClick={() => loadFrame(frameIndex + 1)} disabled={!session || frameIndex >= maxFrame}>→</button>
+              <button onClick={() => loadFrame(frameIndex + 1)} disabled={!session || frameIndex >= maxFrame || reviewBusy}>→</button>
               <div className="frame-readout">
                 <span>Frame <strong>{frameIndex}</strong> / {maxFrame}</span>
                 <span>{frame ? `${frame.time_s.toFixed(3)} s` : "—"}</span>
               </div>
             </div>
-            <p className="viewer-note">Preview seeking uses nominal FPS only in I4. It is not an exact-VFR timing claim.</p>
+            <p className="viewer-note">Drag a visible landmark to review that frame. Release saves the correction; Esc cancels the active drag. Preview seeking still uses nominal FPS and is not an exact-VFR timing claim.</p>
           </div>
 
           {error && <div className="error-banner" role="alert">{error}</div>}
@@ -305,8 +339,8 @@ function App() {
                 <div><span className="eyebrow">Frame evidence</span><h2>Landmarks</h2></div>
                 <span className="mini-badge">{correctedCount} corrected</span>
               </div>
-              <div className="landmark-table" role="table" aria-label="Current frame landmarks">
-                <div className="table-row table-head" role="row"><span>Role</span><span>X px</span><span>Y px</span><span>State</span></div>
+              <div className="landmark-table landmark-review-table" role="table" aria-label="Current frame landmarks">
+                <div className="table-row table-head" role="row"><span>Role</span><span>X px</span><span>Y px</span><span>State</span><span>Review</span></div>
                 {LANDMARK_ORDER.map((role) => {
                   const point = frame?.landmarks[role];
                   return (
@@ -317,19 +351,35 @@ function App() {
                       <span className={`source-state source-${point?.source_state ?? "missing"}`}>
                         {point?.source_state === "manual_corrected" ? "Corrected" : point ? "Automatic" : "Missing"}
                       </span>
+                      <span className="review-actions">
+                        <button
+                          type="button"
+                          className="table-action"
+                          aria-label={`Reset ${role} to automatic`}
+                          disabled={!point || point.source_state !== "manual_corrected" || reviewBusy}
+                          onClick={() => resetLandmark(role)}
+                        >
+                          Reset
+                        </button>
+                        <button type="button" className="table-action"
+                          aria-label={`Undo ${role} correction`}
+                          disabled={!point || point.source_state !== "manual_corrected" || reviewBusy}
+                          onClick={() => undoLandmark(role)}>
+                          Undo
+                        </button>
+                      </span>
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            <div className="panel compact-panel reserved-panel">
-              <span className="eyebrow">Results workspace</span>
-              <h2>Curves & frame table</h2>
-              <div className="reserved-graphic" aria-hidden="true">
-                <span /><span /><span />
-              </div>
-              <p>Reserved for synchronized curves and table navigation in I6. I4 keeps the layout contract without inventing result behavior early.</p>
+            <div className="panel compact-panel">
+              <ResultsWorkspace
+                session={session}
+                currentFrame={frameIndex}
+                onSelectFrame={(index) => void loadFrame(index)}
+              />
             </div>
           </div>
         </section>
@@ -375,7 +425,7 @@ function App() {
               <li>Shank-foot: geometric image-plane angle</li>
               <li>Trunk: inclination vs image vertical</li>
             </ul>
-            <p>These values are measurement outputs, not clinical diagnoses.</p>
+            <p>Manual review corrects visible landmark placement; it does not by itself establish clinical accuracy.</p>
           </div>
 
           <div className="integrity-block">
@@ -384,6 +434,9 @@ function App() {
             <div className="legend-row"><span className="legend-dot corrected" />Manual correction active</div>
             <div className="legend-row"><span className="legend-dot invalid" />Missing / invalid</div>
           </div>
+
+          <div className="divider" />
+          <ExportPanel session={session} />
         </aside>
       </main>
     </div>

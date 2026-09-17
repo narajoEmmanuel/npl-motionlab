@@ -1,0 +1,60 @@
+.review-overlay {
+  touch-action: none;
+}
+
+.review-overlay .landmark-handle {
+  cursor: grab;
+  pointer-events: all;
+  vector-effect: non-scaling-stroke;
+  stroke-width: 3;
+}
+
+.review-overlay .landmark-handle:active,
+.review-overlay.is-dragging .landmark-active .landmark-handle {
+  cursor: grabbing;
+}
+
+.review-overlay .landmark-active .landmark-handle {
+  stroke-width: 5;
+}
+
+.review-overlay .drag-help {
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.94);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+  fill: var(--ink-strong, #101820);
+  pointer-events: none;
+}
+
+.landmark-review-table .table-row {
+  grid-template-columns: minmax(64px, 1fr) minmax(48px, 0.8fr) minmax(48px, 0.8fr) minmax(78px, 1fr) 112px;
+}
+
+.review-actions { display: flex; gap: 4px; }
+
+.table-action {
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1px solid var(--line-strong, #aeb8bf);
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.table-action:hover:not(:disabled) {
+  background: var(--surface-subtle, #eef2f4);
+}
+
+.table-action:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.table-action:focus-visible,
+.review-overlay .landmark-handle:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 2px;
+}

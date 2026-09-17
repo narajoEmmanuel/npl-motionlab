@@ -1,5 +1,6 @@
 import type {
   FrameSnapshot,
+  LandmarkRole,
   MeasurementDefinition,
   SessionSnapshot,
   Side,
@@ -15,6 +16,12 @@ interface AnalysisImportResponse {
     automatic_landmarks: number;
     measurement_results: number;
   };
+}
+
+export interface ExportResponse {
+  session_id: string;
+  export_dir: string;
+  artifacts: Record<string, string>;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -70,4 +77,39 @@ export const motionlabApi = {
 
   getFrame: (sessionId: string, frameIndex: number) =>
     request<FrameSnapshot>(`/sessions/${sessionId}/frames/${frameIndex}`),
+
+  getFrames: (sessionId: string) =>
+    request<FrameSnapshot[]>(`/sessions/${sessionId}/frames`),
+
+  correctLandmark: (
+    sessionId: string,
+    frameIndex: number,
+    role: LandmarkRole,
+    payload: { x_px: number; y_px: number; note?: string },
+  ) =>
+    request<FrameSnapshot>(
+      `/sessions/${sessionId}/frames/${frameIndex}/landmarks/${role}/corrections`,
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    ),
+
+  resetLandmark: (sessionId: string, frameIndex: number, role: LandmarkRole) =>
+    request<FrameSnapshot>(
+      `/sessions/${sessionId}/frames/${frameIndex}/landmarks/${role}/correction`,
+      { method: "DELETE" },
+    ),
+
+  undoLandmark: (sessionId: string, frameIndex: number, role: LandmarkRole) =>
+    request<FrameSnapshot>(
+      `/sessions/${sessionId}/frames/${frameIndex}/landmarks/${role}/undo`,
+      { method: "POST" },
+    ),
+
+  exportSession: (sessionId: string, includeOverlayMp4 = true) =>
+    request<ExportResponse>(`/sessions/${sessionId}/exports`, {
+      method: "POST",
+      body: JSON.stringify({ include_overlay_mp4: includeOverlayMp4 }),
+    }),
 };
