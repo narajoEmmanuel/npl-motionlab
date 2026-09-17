@@ -103,6 +103,12 @@ professional marker-based motion capture.
 
 ## Optional work
 
+### Post-Core video visualization
+
+[Video Angle Overlay](docs/video_angle_overlay.md) renders existing MotionLab
+CSV points and projected-flexion values on a private source video. This optional
+visualization does not change the frozen Core measurement logic or conclusions.
+
 ### Kinovea reference appendix
 
 An independent Kinovea manual-reference comparison may be added **after the Core
